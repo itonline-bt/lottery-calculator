@@ -1,6 +1,6 @@
 /* ຄິດໄລ່ໂພຍ — service worker
    ເກັບໄຟລ໌ໄວ້ໃນເຄື່ອງ ເພື່ອໃຫ້ເປີດໃຊ້ໄດ້ ເຖິງບໍ່ມີອິນເຕີເນັດ */
-const VERSION = "poy-2026.07.20-6";
+const VERSION = "poy-2026.07.20-9";
 const SHELL = VERSION + "-shell";
 const RUNTIME = VERSION + "-runtime";
 

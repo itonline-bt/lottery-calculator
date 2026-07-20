@@ -1311,6 +1311,31 @@
                   <code>23-20</code> — 2 ຈຳນວນ ບໍ່ມີ = → ເລກ 23 ລາຄາ 20
                 </div>
                 <div class="rule">
+                  <code>07</code> <code>47</code> <code>87=5</code> —
+                  ລາຄາຢູ່ແຖວລຸ່ມ ກໍ່ອ່ານໄດ້ (07, 47 ໄດ້ 5 ນຳ)
+                </div>
+                <div class="rule">
+                  <code>ລວມ21.000</code> ຫຼື <code>20,000ຢຸ້ຍ</code> —
+                  ຈຸດ/ຈຸດຕັດຫຼັກພັນ ອ່ານໄດ້ ແລະ ຖ້າຂຽນລາຄາເປັນພັນ
+                  ຈະຖືວ່າກົງກັນ
+                </div>
+                <div class="rule">
+                  <code>39-79ໂຕ30*30</code> — ຂຽນ <code>ໂຕ</code> ຕິດກັບເລກ
+                  ກໍ່ໄດ້<br />2 ຕົວ × (30+30) ຍອດ <span class="res">120</span>
+                </div>
+                <div class="rule">
+                  <code>ລ່າງ+ບົນ</code> <code>ບົນ+ລ່າງ</code> <code>ບລ</code> =
+                  ທັງສອງ · <code>16.56.96=10ລ່າງ</code> = ລຸ່ມຢ່າງດຽວ
+                </div>
+                <div class="rule">
+                  <code>01_1</code> — ຂີດລຸ່ມ <code>_</code> ໃຊ້ຂັ້ນໄດ້
+                  ຄືກັບ <code>-</code>
+                </div>
+                <div class="rule">
+                  <code>…=5ພັນ. 101-…=2ພັນ</code> — 2 ລາຍການໃນແຖວດຽວ
+                  ກໍ່ແຍກໃຫ້
+                </div>
+                <div class="rule">
                   <code>22.62=5ອ້າຍລອງ</code> — ຊື່ຕໍ່ທ້າຍ = ຊື່ຂອງຊຸດນັ້ນ
                 </div>
                 <div class="rule">
@@ -1498,6 +1523,24 @@
         const n = parseFloat(String(x).replace(/[^\d.\-]/g, ""));
         return isNaN(n) ? 0 : n;
       }
+      /* ອ່ານຕົວເລກໃນແຖວ ໂດຍຮູ້ຈັກຈຸດຂັ້ນຫຼັກພັນ: "21.000" → 21000 */
+      function grabNums(str) {
+        const m = String(str).match(/\d[\d.,]*/g) || [];
+        return m.map((t) => {
+          t = t.replace(/[.,]+$/, "");
+          if (/^\d{1,3}([.,]\d{3})+$/.test(t))
+            return parseInt(t.replace(/[.,]/g, ""), 10);
+          return toNum(t);
+        });
+      }
+      /* ຍອດຄິດໄລ່ ກັບ ຍອດທີ່ຂຽນ ອາດຕ່າງກັນ 1000 ເທົ່າ
+         (ຄົນຂຽນລາຄາເປັນ "ພັນ" ແຕ່ຂຽນຍອດລວມເປັນກີບເຕັມ) */
+      function sameAmount(sum, stated) {
+        if (!stated) return false;
+        return (
+          sum === stated || sum * 1000 === stated || sum === stated * 1000
+        );
+      }
       function countNums(s) {
         return (
           String(s)
@@ -1530,39 +1573,87 @@
       }
 
       /* ---------- ຕົວອ່ານແຖວ (ໃຊ້ຮ່ວມກັນທັງພິມແຖວດຽວ ແລະ ວາງທັງກ້ອນ) ---------- */
+      // ຄຳນຳໜ້າລາຄາທີ່ຂຽນຕິດກັບເລກ ເຊັ່ນ "39-79ໂຕ30*30"
+      const INLINE_PRICE =
+        /(?:ໂຕລະ|ຕົວລະ|ຫົວລະ|ໂຕ|ຕົວ|ປ່ອງ|ตัวละ|ตัว|ช่อง)\s*([\d.,]+)\s*(?:[x*\u00d7\u2715\u2716]\s*([\d.,]+))?/;
+      // ບົນ+ລ່າງ / ລ່າງ+ບົນ / ບລ  = ລາຄາເທົ່າກັນທັງສອງ
+      const BOTH_SIDE =
+        /(?:ບົນ|ບ|บน|บ)\s*[+＋]\s*(?:ລ່າງ|ລຸ່ມ|ລ|ล่าง|ล)|(?:ລ່າງ|ລຸ່ມ|ລ|ล่าง|ล)\s*[+＋]\s*(?:ບົນ|ບ|บน|บ)/;
+      const BOTTOM_ONLY = /ລ່າງ|ລຸ່ມ|ล่าง/;
+
       function isBetLine(line) {
         const hasSep = /[=:]/.test(line);
         const hasMul = MUL.test(line);
         return (
           /^\d/.test(line) &&
-          (hasSep || hasMul || /^\d+\s*[-.\/]\s*\d/.test(line))
+          (hasSep ||
+            hasMul ||
+            /^\d+\s*[-._\/]\s*\d/.test(line) ||
+            INLINE_PRICE.test(line))
         );
       }
+
+      /* ບາງແຖວມີຫຼາຍລາຍການ ເຊັ່ນ
+         "01-41-81=5ພັນ. 101-141-181=2ພັນ"  → ຕັດອອກເປັນ 2 ລາຍການ */
+      function splitBets(line) {
+        const txt = String(line);
+        const re = /\s*[.,]?\s+(?=\d)/g;
+        const chunks = [];
+        let start = 0,
+          m;
+        while ((m = re.exec(txt))) {
+          const left = txt.slice(start, m.index);
+          if (
+            /=/.test(left) ||
+            /(?:ໂຕລະ|ຕົວລະ|ໂຕ|ຕົວ|ປ່ອງ)\s*\d/.test(left)
+          ) {
+            chunks.push(left);
+            start = re.lastIndex;
+          }
+        }
+        chunks.push(txt.slice(start));
+        return chunks.map((c) => c.trim()).filter(Boolean);
+      }
+
       function parseBet(line) {
         line = String(line).trim();
         if (!isBetLine(line)) return null;
         let hint = null;
         const hm = line.match(/(?:ເປັນ|เป็น)\s*(\d+)/);
         if (hm) hint = toNum(hm[1]);
-        let core = (line.match(/^[0-9=:x*.,\-\/\s\u00d7\u2715\u2716]+/i) || [
-          "",
-        ])[0].trim();
+        let core = (line.match(
+          /^[0-9=:x*.,_\-\/\s\u00d7\u2715\u2716]+/i,
+        ) || [""])[0].trim();
         core = core.replace(/:/g, "=");
+        const rest = line.slice(
+          (line.match(/^[0-9=:x*.,_\-\/\s\u00d7\u2715\u2716]+/i) || [""])[0]
+            .length,
+        );
+
         let nums = "",
           top = 0,
           bottom = 0,
           inherit = false;
-        if (core.includes("=")) {
+
+        // (ກ) ລາຄາຂຽນຕິດຫຼັງເລກ ເຊັ່ນ "ໂຕ30*30" / "ໂຕ10ພັນ"
+        const ip = rest.match(INLINE_PRICE) || core.match(INLINE_PRICE);
+        if (ip) {
+          nums = core
+            .replace(/=/g, " ")
+            .split(/[-,._\/\s]+/)
+            .filter((t) => /^\d+$/.test(t))
+            .join("-");
+          top = grabNums(ip[1])[0] || 0;
+          bottom = ip[2] ? grabNums(ip[2])[0] || 0 : 0;
+        } else if (core.includes("=")) {
           const parts = core.split("=");
           const left = parts[0];
           const right = parts.slice(1).join("=");
-          nums = left.split(/[-,.\/\s]+/).filter(Boolean).join("-");
+          nums = left.split(/[-,._\/\s]+/).filter(Boolean).join("-");
           if (!right.replace(/[^\d]/g, "")) {
-            // ເຊັ່ນ 49=  (ບໍ່ໄດ້ຂຽນລາຄາ) → ໃຊ້ລາຄາອັນກ່ອນໜ້າ
             inherit = true;
           } else if (MUL.test(right)) {
-            // 10x10 → ບົນ 10 / ລຸ່ມ 10
-            const ab = right.split(MUL).filter((s) => s.trim() !== "");
+            const ab = right.split(MUL).filter((x) => x.trim() !== "");
             top = toNum(ab[0]);
             bottom = ab.length > 1 ? toNum(ab[1]) : toNum(ab[0]);
           } else {
@@ -1570,13 +1661,12 @@
             bottom = 0;
           }
         } else if (MUL.test(core)) {
-          // ເຊັ່ນ 11-51-91x20 → ໝາຍ x ບໍ່ມີລາຄາທີ 2 = ບົນ ແລະ ລຸ່ມ ເທົ່າກັນ
-          const parts = core.split(MUL).filter((s) => s.trim() !== "");
-          nums = parts[0].split(/[-,.\/\s]+/).filter(Boolean).join("-");
+          const parts = core.split(MUL).filter((x) => x.trim() !== "");
+          nums = parts[0].split(/[-,._\/\s]+/).filter(Boolean).join("-");
           top = parts.length > 1 ? toNum(parts[1]) : 0;
           bottom = parts.length > 2 ? toNum(parts[2]) : top;
         } else {
-          const parts = core.split(/[-,.\/\s]+/).filter(Boolean);
+          const parts = core.split(/[-,._\/\s]+/).filter(Boolean);
           if (parts.length === 2) {
             nums = parts[0];
             top = toNum(parts[1]);
@@ -1587,10 +1677,17 @@
             bottom = 0;
           }
         }
-        // ຕໍ່ທ້າຍດ້ວຍ ບລ / ບ,ລ / ບ-ລ  →  ລາຄານັ້ນເປັນທັງ ບົນ ແລະ ລຸ່ມ
-        if (BL.test(line) && !bottom) bottom = top;
+
+        // (ຂ) ຄຳກຳກັບ ບົນ / ລ່າງ
+        if (BOTH_SIDE.test(line) || BL.test(rest)) {
+          if (!bottom) bottom = top;
+        } else if (BOTTOM_ONLY.test(rest) && top && !bottom) {
+          bottom = top;
+          top = 0;
+        }
         return { nums, top, bottom, hint, inherit };
       }
+
       function rowTotal(r) {
         return (toNum(r.top) + toNum(r.bottom)) * (countNums(r.nums) || 1);
       }
@@ -1685,7 +1782,15 @@
             }
             carry = null;
           }
-          real.push(o);
+          const chunks = splitBets(o.t);
+          chunks.forEach((c, ci) => {
+            real.push({
+              t: c,
+              newMsg: ci === 0 ? o.newMsg : false,
+              time: o.time,
+              sender: o.sender,
+            });
+          });
         });
         if (!real.length) return 0;
         const single = real.length === 1; // ພິມເອງແຖວດຽວ → ເອົາຂຶ້ນເທິງສຸດ
@@ -1699,16 +1804,27 @@
         function flushPending() {
           pending.forEach((r) => {
             const idx = rows.indexOf(r);
+            const priced = (k) =>
+              rows[k].seg === r.seg &&
+              (toNum(rows[k].top) || toNum(rows[k].bottom));
             let src = null;
-            for (let k = idx - 1; k >= 0; k--) {
-              if (
-                rows[k].seg === r.seg &&
-                (toNum(rows[k].top) || toNum(rows[k].bottom))
-              ) {
-                src = rows[k];
-                break;
-              }
-            }
+            // ຮູບແບບ "07 / 47 / 87=5" → ລາຄາຢູ່ແຖວລຸ່ມ ຫາລົງກ່ອນ
+            for (let k = idx + 1; k < rows.length; k++)
+              if (rows[k].seg === r.seg) {
+                if (priced(k)) {
+                  src = rows[k];
+                  break;
+                }
+              } else break;
+            // ຮູບແບບ "099=10 / 199" → ລາຄາຢູ່ແຖວເທິງ
+            if (!src)
+              for (let k = idx - 1; k >= 0; k--)
+                if (rows[k].seg === r.seg) {
+                  if (priced(k)) {
+                    src = rows[k];
+                    break;
+                  }
+                } else break;
             if (!src && prevBet && prevBet.seg === r.seg) src = prevBet;
             if (src) {
               r.top = toNum(src.top);
@@ -1763,23 +1879,36 @@
           const bet0 = isBetLine(line);
 
           // ---- ແຖວທີ່ມີຄຳ + ຕົວເລກ ----
+          // ຕົວເລກນຳໜ້າ ແລ້ວຕໍ່ດ້ວຍຕົວໜັງສືລາວທັນທີ ເຊັ່ນ "20,000ຢຸ້ຍ"
+          // (ບໍ່ນັບ "16/ໄທ" ເພາະມີ / ຂັ້ນກາງ)
+          const leadNum =
+            /^[\d.,]+\s*([\u0E80-\u0EFF\u0E00-\u0E7F].*)$/.exec(line);
           const wordNum =
             /ລວມ|รวม/.test(line) ||
             (LAO_THAI.test(line) &&
               /\d/.test(line) &&
-              (/[\d\u0e3f]\s*$/.test(line) || UNIT_WORD.test(line)) &&
+              (/[\d\u0e3f]\s*$/.test(line) ||
+                UNIT_WORD.test(line) ||
+                (leadNum && LAO_THAI.test(leadNum[1]))) &&
               !bet0);
           if (wordNum) {
             const isLuam = /ລວມ|รวม/.test(line);
-            const word = line
+            let word =
+              leadNum && LAO_THAI.test(leadNum[1])
+                ? leadNum[1]
+                : line
+                    .replace(UNIT_WORD, "")
+                    .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭|THB|LAK)\s*$/i, "")
+                    .replace(/[\d\u0e3f\s.x*\u00d7]+$/, "")
+                    .replace(/[=:]\s*$/, "");
+            word = word
               .replace(UNIT_WORD, "")
-              .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭|THB|LAK)\s*$/i, "")
-              .replace(/[\d\u0e3f\s.x*\u00d7]+$/, "")
-              .replace(/[=:]\s*$/, "")
+              .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭)\s*$/i, "")
               .trim();
 
             // (ກ) ຍັງມີແຖວທີ່ບໍ່ມີລາຄາ ແລະ ບໍ່ແມ່ນຄຳວ່າ "ລວມ" → ນີ້ຄືລາຄາຕໍ່ຕົວ
-            if (pending.length && !isLuam) {
+            const startsWord = /^[\u0E80-\u0EFF\u0E00-\u0E7F]/.test(line);
+            if (pending.length && !isLuam && startsWord) {
               const mm = line.match(/(\d+)\s*[x*\u00d7]\s*(\d+)\s*$/);
               let top = 0,
                 bottom = 0;
@@ -1787,8 +1916,8 @@
                 top = toNum(mm[1]);
                 bottom = toNum(mm[2]);
               } else {
-                const nn = line.match(/\d+/g);
-                top = nn ? toNum(nn[nn.length - 1]) : 0;
+                const nn = grabNums(line);
+                top = nn.length ? nn[nn.length - 1] : 0;
               }
               pending.forEach((r) => {
                 r.top = top;
@@ -1801,8 +1930,8 @@
 
             // (ຂ) ຍອດສະຫຼຸບ / ຊື່ລູກຄ້າ + ຍອດ
             flushPending();
-            const allNums = line.match(/\d+/g);
-            const stated = allNums ? toNum(allNums[allNums.length - 1]) : 0;
+            const allNums = grabNums(line);
+            const stated = allNums.length ? allNums[allNums.length - 1] : 0;
             if (/\u0e3f|ບາດ|บาท|thb/i.test(line)) lineCur = "THB";
             else if (/₭|ກີບ|กีบ|lak/i.test(line)) lineCur = "LAK";
             const segNow = segCounter;
@@ -1846,8 +1975,14 @@
           }
           // ຊື່ລູກຄ້າຕໍ່ທ້າຍ ເຊັ່ນ 22.62=5ອ້າຍລອງ
           const tail = line
-            .replace(/^[0-9=:x*.,\-\/\s\u00d7\u2715\u2716]+/i, "")
-            .replace(/(ບ\s*[,\-\/.]?\s*ລ|บ\s*[,\-\/.]?\s*ล)\s*$/, "")
+            .replace(/^[0-9=:x*.,_\-\/\s\u00d7\u2715\u2716]+/i, "")
+            .replace(INLINE_PRICE, "")
+            .replace(UNIT_WORD, "")
+            .replace(/(ບົນ|ລ່າງ|ລຸ່ມ|บน|ล่าง)/g, "")
+            .replace(/(ບ\s*[,\-\/.]?\s*ລ|บ\s*[,\-\/.]?\s*ล)/g, "")
+            .replace(/^(ໂຕລະ|ຕົວລະ|ໂຕ|ຕົວ|ປ່ອງ)/, "")
+            .replace(/[+＋\-.,_\s\d]+/g, " ")
+            .replace(/(ເດິ້|ເດີ້|ເດີ|ນະ|ນໍ|ດ້ວຍ|ค่ะ|ครับ)/g, "")
             .trim();
           if (tail && LAO_THAI.test(tail) && !PRICE_WORD.test(tail))
             segName(segCounter, tail);
@@ -2190,7 +2325,7 @@
           let chip;
           if (stated)
             chip =
-              sum === stated
+              sameAmount(sum, stated)
                 ? '<span class="chip ok">' + fmt(sum) + " " + sym + " ✓</span>"
                 : '<span class="chip bad">' +
                   fmt(sum) +
@@ -2323,7 +2458,7 @@
             sum,
             curName((gr[0] && gr[0].cur) || m.cur || "LAK"),
             stated || "",
-            stated ? (sum === stated ? "ກົງກັນ" : "ບໍ່ກົງ") : "",
+            stated ? (sameAmount(sum, stated) ? "ກົງກັນ" : "ບໍ່ກົງ") : "",
           ]);
         });
         aoa.push([]);
@@ -2658,7 +2793,7 @@
         showInstallBtn(false);
       }
       /* ---------- ອັບເດດອັດຕະໂນມັດ + ບັງຄັບອັບເດດ ---------- */
-      const APP_VERSION = "2026.07.20-6";
+      const APP_VERSION = "2026.07.20-9";
       let swReg = null;
       let updShown = false;
 
