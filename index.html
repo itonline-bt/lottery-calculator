@@ -1298,7 +1298,18 @@
                   ຕົວ × (21+21) ຍອດ <span class="res">126</span>
                 </div>
                 <div class="rule">
-                  <code>49=</code> (ບໍ່ຂຽນລາຄາ) → ໃຊ້ລາຄາຂອງແຖວກ່ອນໜ້າ
+                  <code>49=</code> ຫຼື <code>199</code> (ບໍ່ຂຽນລາຄາ) →
+                  ໃຊ້ລາຄາຂອງແຖວກ່ອນໜ້າ
+                </div>
+                <div class="rule">
+                  ຂຽນເລກຫຼາຍແຖວ ແລ້ວປິດທ້າຍດ້ວຍ <code>ໂຕລະ20</code> ຫຼື
+                  <code>ປ່ອງ20</code> → ທຸກແຖວຂ້າງເທິງ ຕົວລະ 20
+                </div>
+                <div class="rule">
+                  <code>22.62=5ອ້າຍລອງ</code> — ຊື່ຕໍ່ທ້າຍ = ຊື່ຂອງຊຸດນັ້ນ
+                </div>
+                <div class="rule">
+                  1 ຂໍ້ຄວາມແຊັດ = 1 ຊຸດ · ເກັບເວລາ ແລະ ຜູ້ສົ່ງໄວ້ໃຫ້ນຳ
                 </div>
                 <div class="rule">
                   ຫົວຂໍ້ມີຄຳວ່າ <code>ໄທ</code> (ເຊັ່ນ 16/ໄທ) →
@@ -1464,7 +1475,7 @@
     <script>
       "use strict";
       let rows = [];
-      let bills = [];
+      let segMeta = {}; // ຂໍ້ມູນແຕ່ລະຊຸດ: {time, sender, name, stated, cur}
       let notes = [];
       let segCounter = 0;
       let currentId = null,
@@ -1594,30 +1605,52 @@
       function stripChat(line) {
         let s = String(line).trim();
         let hadPrefix = false;
+        let time = "";
+        let sender = "";
         const before = s;
-        s = s.replace(/^\[[^\]]{1,60}\]\s*/, "");
-        s = s.replace(
-          /^\d{1,2}[\/.]\d{1,2}[\/.]\d{2,4},?\s*\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?\s*[-–—]\s*/i,
-          "",
+        const br = s.match(/^\[([^\]]{1,60})\]\s*/);
+        if (br) {
+          time = br[1].trim();
+          s = s.slice(br[0].length);
+        }
+        const dash = s.match(
+          /^(\d{1,2}[\/.]\d{1,2}[\/.]\d{2,4},?\s*\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s*[-–—]\s*/i,
         );
-        s = s.replace(
-          /^\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?\s*[-–—]\s*/i,
-          "",
-        );
+        if (dash) {
+          time = time || dash[1].trim();
+          s = s.slice(dash[0].length);
+        }
+        const t2 = s.match(/^(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s*[-–—]\s*/i);
+        if (t2) {
+          time = time || t2[1].trim();
+          s = s.slice(t2[0].length);
+        }
         if (s !== before) hadPrefix = true;
-        // ຊື່ຜູ້ສົ່ງ ເຊັ່ນ "Sone Tv: ..."
         // ຊື່ຜູ້ສົ່ງ ອາດເປັນເບີໂທ (+856 20 55 519 256:) ຫຼື ຊື່ຄົນ
         const m = s.match(/^([^:\n]{1,40}):\s*(.+)$/);
         if (m && (hadPrefix || isPhoneName(m[1]) || isPersonName(m[1], m[2]))) {
+          sender = m[1].trim();
           s = m[2].trim();
         }
-        return { t: s.trim(), newMsg: hadPrefix };
+        return { t: s.trim(), newMsg: hadPrefix, time, sender };
       }
       function cleanLine(line) {
         return stripChat(line).t;
       }
 
-      /* ---------- ອ່ານຂໍ້ຄວາມ (1 ແຖວ ຫຼື ຫຼາຍແຖວ) ---------- */
+      /* ---------- ອ່ານຂໍ້ຄວາມ (1 ແຖວ ຫຼື ຫຼາຍແຖວ) ----------
+         ຫຼັກການ: 1 ຂໍ້ຄວາມແຊັດ = 1 ຊຸດ (set/bill)
+         ແຖວທີ່ຍັງບໍ່ມີລາຄາ ຈະລໍຖ້າແຖວ "ໂຕລະ20 / ປ່ອງ20" ຫຼື ເອົາລາຄາແຖວກ່ອນໜ້າ */
+      const PRICE_WORD = /^(ໂຕລະ|ຕົວລະ|ໂຕ|ຕົວ|ປ່ອງ|ຫົວລະ|ตัวละ|ตัว|ช่อง|ต่อตัว)$/;
+      function segSet(seg, patch) {
+        segMeta[seg] = Object.assign({}, segMeta[seg] || {}, patch);
+      }
+      function segName(seg, name) {
+        if (!name) return;
+        const m = segMeta[seg] || {};
+        if (!m.name) segSet(seg, { name });
+      }
+
       function processText(text) {
         const real = String(text)
           .split(/\r?\n/)
@@ -1626,20 +1659,47 @@
         if (!real.length) return 0;
         const single = real.length === 1; // ພິມເອງແຖວດຽວ → ເອົາຂຶ້ນເທິງສຸດ
         const startLen = rows.length;
-        let curBill = "";
-        let headerCur = curCur; // ສະກຸນຈາກຫົວຂໍ້ (ໄທ/ລາວ) — ໃຊ້ຕໍ່ໄປທັງໃບ
+        let headerCur = curCur; // ສະກຸນຈາກຫົວຂໍ້ (ໄທ/ລາວ)
         let lineCur = curCur;
         let added = 0;
+        let pending = []; // ແຖວທີ່ຍັງບໍ່ມີລາຄາ
+
+        // ແຖວທີ່ຍັງບໍ່ມີລາຄາ → ເອົາລາຄາຂອງແຖວກ່ອນໜ້າໃນຊຸດດຽວກັນ
+        function flushPending() {
+          pending.forEach((r) => {
+            const idx = rows.indexOf(r);
+            let src = null;
+            for (let k = idx - 1; k >= 0; k--) {
+              if (
+                rows[k].seg === r.seg &&
+                (toNum(rows[k].top) || toNum(rows[k].bottom))
+              ) {
+                src = rows[k];
+                break;
+              }
+            }
+            if (!src && prevBet && prevBet.seg === r.seg) src = prevBet;
+            if (src) {
+              r.top = toNum(src.top);
+              r.bottom = toNum(src.bottom);
+            }
+          });
+          pending = [];
+        }
 
         for (const o of real) {
           const line = o.t;
-          // ຂໍ້ຄວາມແຊັດອັນໃໝ່ = ເລີ່ມກ້ອນໃໝ່ ແລະ ກັບໄປໃຊ້ສະກຸນຕັ້ງຕົ້ນ
+
+          // ---- ຂໍ້ຄວາມແຊັດອັນໃໝ່ = ຊຸດໃໝ່ ----
           if (o.newMsg) {
+            flushPending();
             if (rows.some((r) => r.seg === segCounter)) segCounter++;
             headerCur = lineCur = curCur;
-            curBill = "";
+            if (o.time || o.sender)
+              segSet(segCounter, { time: o.time, sender: o.sender });
           }
-          // ພິມຍອດເປົ່າໆ ເຊັ່ນ 250 (ສະເພາະຕອນພິມແຖວດຽວ)
+
+          // ---- ພິມຍອດເປົ່າໆ ເຊັ່ນ 250 (ສະເພາະຕອນພິມແຖວດຽວ) ----
           if (single && /^\d+(\.\d+)?$/.test(line)) {
             rows.push({
               nums: "",
@@ -1653,58 +1713,113 @@
             continue;
           }
 
+          // ---- ເລກໂດດ ບໍ່ມີລາຄາ ເຊັ່ນ 09 / 199 ----
+          if (!single && /^\d{1,6}$/.test(line)) {
+            const r = {
+              nums: line,
+              top: 0,
+              bottom: 0,
+              seg: segCounter,
+              hint: null,
+              cur: lineCur,
+            };
+            rows.push(r);
+            pending.push(r);
+            added++;
+            continue;
+          }
+
           const bet0 = isBetLine(line);
 
-          // ຍອດສະຫຼຸບ / ຊື່ລູກຄ້າ + ຍອດ
-          const isSubtotal =
+          // ---- ແຖວທີ່ມີຄຳ + ຕົວເລກ ----
+          const wordNum =
             /ລວມ|รวม/.test(line) ||
             (LAO_THAI.test(line) &&
               /\d/.test(line) &&
               /[\d\u0e3f]\s*$/.test(line) &&
               !bet0);
-          if (isSubtotal) {
+          if (wordNum) {
+            const isLuam = /ລວມ|รวม/.test(line);
+            const word = line
+              .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭|THB|LAK)\s*$/i, "")
+              .replace(/[\d\u0e3f\s.x*\u00d7]+$/, "")
+              .replace(/[=:]\s*$/, "")
+              .trim();
+
+            // (ກ) ຍັງມີແຖວທີ່ບໍ່ມີລາຄາ ແລະ ບໍ່ແມ່ນຄຳວ່າ "ລວມ" → ນີ້ຄືລາຄາຕໍ່ຕົວ
+            if (pending.length && !isLuam) {
+              const mm = line.match(/(\d+)\s*[x*\u00d7]\s*(\d+)\s*$/);
+              let top = 0,
+                bottom = 0;
+              if (mm) {
+                top = toNum(mm[1]);
+                bottom = toNum(mm[2]);
+              } else {
+                const nn = line.match(/\d+/g);
+                top = nn ? toNum(nn[nn.length - 1]) : 0;
+              }
+              pending.forEach((r) => {
+                r.top = top;
+                r.bottom = bottom;
+              });
+              pending = [];
+              if (word && !PRICE_WORD.test(word)) segName(segCounter, word);
+              continue;
+            }
+
+            // (ຂ) ຍອດສະຫຼຸບ / ຊື່ລູກຄ້າ + ຍອດ
+            flushPending();
             const allNums = line.match(/\d+/g);
             const stated = allNums ? toNum(allNums[allNums.length - 1]) : 0;
-            // ຖ້າທ້າຍຍອດລວມມີ ฿ / ບາດ → ຊຸດນີ້ທັງໝົດເປັນບາດ
             if (/\u0e3f|ບາດ|บาท|thb/i.test(line)) lineCur = "THB";
             else if (/₭|ກີບ|กีบ|lak/i.test(line)) lineCur = "LAK";
             const segNow = segCounter;
             rows.forEach((r) => {
               if (r.seg === segNow) r.cur = lineCur;
             });
-            const name =
-              line
-                .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭|THB|LAK)\s*$/i, "")
-                .replace(/[\d\u0e3f\s]+$/, "")
-                .replace(/[=:]\s*$/, "")
-                .trim() || "ບິນ " + (bills.length + 1);
-            bills.push({
-              name,
+            segSet(segNow, {
               stated,
-              header: curBill,
-              seg: segCounter,
               cur: lineCur,
+              name: (segMeta[segNow] && segMeta[segNow].name) || word || "",
             });
-            curBill = "";
             lineCur = headerCur;
             segCounter++;
+            if (segMeta[segNow] && (segMeta[segNow].time || segMeta[segNow].sender))
+              segSet(segCounter, {
+                time: segMeta[segNow].time,
+                sender: segMeta[segNow].sender,
+              });
             continue;
           }
 
-          // ຫົວຂໍ້ / ປ້າຍ ເຊັ່ນ 16/ໄທ , ບ,ລ
+          // ---- ຫົວຂໍ້ / ປ້າຍ ເຊັ່ນ 16/ໄທ , ບ,ລ ----
           if (!bet0) {
             notes.push(line);
             if (/ໄທ|ไทย|thai/i.test(line)) lineCur = headerCur = "THB";
             else if (/ລາວ|ลาว|lao/i.test(line)) lineCur = headerCur = "LAK";
-            if (/\//.test(line) || LAO_THAI.test(line)) curBill = line;
+            else if (
+              LAO_THAI.test(line) &&
+              !/\//.test(line) &&
+              !(BL.test(line) && line.trim().length <= 6)
+            )
+              segName(segCounter, line.trim());
             continue;
           }
 
+          // ---- ແຖວເລກປົກກະຕິ ----
           const bet = parseBet(line);
           if (!bet) {
             notes.push(line);
             continue;
           }
+          // ຊື່ລູກຄ້າຕໍ່ທ້າຍ ເຊັ່ນ 22.62=5ອ້າຍລອງ
+          const tail = line
+            .replace(/^[0-9=:x*.,\-\/\s\u00d7\u2715\u2716]+/i, "")
+            .replace(/(ບ\s*[,\-\/.]?\s*ລ|บ\s*[,\-\/.]?\s*ล)\s*$/, "")
+            .trim();
+          if (tail && LAO_THAI.test(tail) && !PRICE_WORD.test(tail))
+            segName(segCounter, tail);
+
           if (bet.inherit) {
             const prev = prevBet || rows[rows.length - 1];
             if (prev) {
@@ -1721,8 +1836,11 @@
             cur: lineCur,
           };
           rows.push(prevBet);
+          if (!bet.top && !bet.bottom) pending.push(prevBet);
           added++;
         }
+        flushPending();
+
         // ພິມເອງແຖວດຽວ = ຂຶ້ນເທິງສຸດ / ວາງທັງກ້ອນ = ຮຽງຕາມໂພຍ ຕໍ່ທ້າຍ
         if (single && rows.length > startLen) {
           const fresh = rows.splice(startLen);
@@ -2002,41 +2120,67 @@
       }
 
       /* ---------- ບິນ ---------- */
+      function segList() {
+        const seen = [];
+        rows.forEach((r) => {
+          if (seen.indexOf(r.seg) < 0) seen.push(r.seg);
+        });
+        return seen;
+      }
+      function segTotal(seg) {
+        let sum = 0;
+        rows.forEach((r) => {
+          if (r.seg === seg) sum += rowTotal(r);
+        });
+        return sum;
+      }
+      function segTitle(seg, i) {
+        const m = segMeta[seg] || {};
+        return m.name || "ຊຸດ " + (i + 1);
+      }
       function renderBills() {
         const el = document.getElementById("bills");
-        if (!bills.length) {
+        const segs = segList();
+        if (!segs.length) {
           el.innerHTML =
             '<div class="empty" style="padding:16px">— ຍັງບໍ່ມີ —</div>';
           return;
         }
         el.innerHTML = "";
-        bills.forEach((b) => {
-          const gr = rows.filter((r) => r.seg === b.seg);
-          let sum = 0;
-          gr.forEach((r) => (sum += rowTotal(r)));
-          const sym = curSym((gr[0] && gr[0].cur) || b.cur || "LAK");
-          const match = sum === b.stated;
+        segs.forEach((seg, i) => {
+          const m = segMeta[seg] || {};
+          const gr = rows.filter((r) => r.seg === seg);
+          const sum = segTotal(seg);
+          const sym = curSym((gr[0] && gr[0].cur) || m.cur || "LAK");
+          const stated = toNum(m.stated);
           const div = document.createElement("div");
           div.className = "bill";
-          div.innerHTML =
-            '<div class="h"><span class="name">' +
-            escapeHtml(b.name) +
-            "</span>" +
-            (b.stated
-              ? match
+          let chip;
+          if (stated)
+            chip =
+              sum === stated
                 ? '<span class="chip ok">' + fmt(sum) + " " + sym + " ✓</span>"
                 : '<span class="chip bad">' +
                   fmt(sum) +
                   " / ຂຽນ " +
-                  fmt(b.stated) +
+                  fmt(stated) +
                   " " +
                   sym +
-                  "</span>"
-              : '<span class="chip plain">' + fmt(sum) + " " + sym + "</span>") +
+                  "</span>";
+          else
+            chip = '<span class="chip plain">' + fmt(sum) + " " + sym + "</span>";
+          const meta = [];
+          if (m.time) meta.push(escapeHtml(m.time));
+          if (m.sender) meta.push(escapeHtml(m.sender));
+          div.innerHTML =
+            '<div class="h"><span class="name">' +
+            escapeHtml(segTitle(seg, i)) +
+            "</span>" +
+            chip +
             '</div><div class="detail">' +
             gr.length +
             " ລາຍການ" +
-            (b.header ? " · " + escapeHtml(b.header) : "") +
+            (meta.length ? " · " + meta.join(" · ") : "") +
             "</div>";
           el.appendChild(div);
         });
@@ -2059,7 +2203,7 @@
         autoGrow();
         updatePreview();
         rows = [];
-        bills = [];
+        segMeta = {};
         notes = [];
         segCounter = 0;
         prevBet = null;
@@ -2093,16 +2237,27 @@
 
       /* ---------- Excel ---------- */
       function buildAOA() {
-        const segName = {};
-        bills.forEach((b) => (segName[b.seg] = b.name));
+        const segs = segList();
+        const nameOf = {};
+        segs.forEach((sg, i) => (nameOf[sg] = segTitle(sg, i)));
         const aoa = [];
         aoa.push(["ຄິດໄລ່ໂພຍ — " + (currentName || "")]);
         aoa.push(["ອອກເມື່ອ", new Date().toLocaleString("en-GB")]);
         aoa.push([]);
-        aoa.push(["ບິນ", "ເລກ", "ຈຳນວນຕົວ", "ບົນ", "ລຸ່ມ", "ຍອດລວມ", "ສະກຸນ"]);
+        aoa.push([
+          "ຊຸດ",
+          "ເວລາ",
+          "ເລກ",
+          "ຈຳນວນຕົວ",
+          "ບົນ",
+          "ລຸ່ມ",
+          "ຍອດລວມ",
+          "ສະກຸນ",
+        ]);
         rows.forEach((r) => {
           aoa.push([
-            segName[r.seg] || "—",
+            nameOf[r.seg] || "—",
+            (segMeta[r.seg] && segMeta[r.seg].time) || "",
             r.nums,
             countNums(r.nums) || 1,
             toNum(r.top),
@@ -2112,19 +2267,31 @@
           ]);
         });
         aoa.push([]);
-        aoa.push(["ສະຫຼຸບຕາມບິນ"]);
-        aoa.push(["ບິນ", "ຈຳນວນລາຍການ", "ຍອດລວມ", "ສະກຸນ", "ຍອດທີ່ຂຽນ", "ສະຖານະ"]);
-        bills.forEach((b) => {
-          const gr = rows.filter((r) => r.seg === b.seg);
-          let sum = 0;
-          gr.forEach((r) => (sum += rowTotal(r)));
+        aoa.push(["ສະຫຼຸບຕາມຊຸດ"]);
+        aoa.push([
+          "ຊຸດ",
+          "ເວລາ",
+          "ຜູ້ສົ່ງ",
+          "ຈຳນວນລາຍການ",
+          "ຍອດລວມ",
+          "ສະກຸນ",
+          "ຍອດທີ່ຂຽນ",
+          "ສະຖານະ",
+        ]);
+        segs.forEach((sg, i) => {
+          const m = segMeta[sg] || {};
+          const gr = rows.filter((r) => r.seg === sg);
+          const sum = segTotal(sg);
+          const stated = toNum(m.stated);
           aoa.push([
-            b.name,
+            segTitle(sg, i),
+            m.time || "",
+            m.sender || "",
             gr.length,
             sum,
-            curName((gr[0] && gr[0].cur) || b.cur || "LAK"),
-            b.stated || "",
-            b.stated ? (sum === b.stated ? "ກົງກັນ" : "ບໍ່ກົງ") : "",
+            curName((gr[0] && gr[0].cur) || m.cur || "LAK"),
+            stated || "",
+            stated ? (sum === stated ? "ກົງກັນ" : "ບໍ່ກົງ") : "",
           ]);
         });
         aoa.push([]);
@@ -2244,12 +2411,12 @@
         if (!currentId || !STORAGE_OK) return;
         const sessions = lsGet("poy_sessions") || [];
         const idx = sessions.findIndex((s) => s.id === currentId);
-        if (idx < 0 && !(rows.length || bills.length)) return;
+        if (idx < 0 && !rows.length) return;
         const entryObj = {
           id: currentId,
           name: currentName,
           updatedAt: Date.now(),
-          data: { rows, bills, notes, segCounter },
+          data: { rows, segMeta, notes, segCounter },
         };
         if (idx >= 0) sessions[idx] = entryObj;
         else sessions.push(entryObj);
@@ -2280,7 +2447,7 @@
         currentId = uuid();
         currentName = "ໂພຍ " + stamp();
         rows = [];
-        bills = [];
+        segMeta = {};
         notes = [];
         segCounter = 0;
         prevBet = null;
@@ -2310,7 +2477,16 @@
         currentName = s.name || "";
         prevBet = null;
         rows = (s.data && s.data.rows) || [];
-        bills = (s.data && s.data.bills) || [];
+        segMeta = (s.data && s.data.segMeta) || {};
+        // ຂໍ້ມູນເກົ່າ (bills) → ແປງເປັນ segMeta
+        const oldB = (s.data && s.data.bills) || [];
+        oldB.forEach((b) => {
+          segMeta[b.seg] = Object.assign({}, segMeta[b.seg] || {}, {
+            name: b.name,
+            stated: b.stated,
+            cur: b.cur,
+          });
+        });
         notes = (s.data && s.data.notes) || [];
         segCounter = (s.data && s.data.segCounter) || 0;
         lsSet("poy_current", currentId);
@@ -2450,7 +2626,7 @@
         showInstallBtn(false);
       }
       /* ---------- ອັບເດດອັດຕະໂນມັດ + ບັງຄັບອັບເດດ ---------- */
-      const APP_VERSION = "2026.07.20-4";
+      const APP_VERSION = "2026.07.20-5";
       let swReg = null;
       let updShown = false;
 
