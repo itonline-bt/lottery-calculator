@@ -1303,7 +1303,12 @@
                 </div>
                 <div class="rule">
                   ຂຽນເລກຫຼາຍແຖວ ແລ້ວປິດທ້າຍດ້ວຍ <code>ໂຕລະ20</code> ຫຼື
-                  <code>ປ່ອງ20</code> → ທຸກແຖວຂ້າງເທິງ ຕົວລະ 20
+                  <code>ປ່ອງ20</code> → ທຸກແຖວຂ້າງເທິງ ຕົວລະ 20<br />
+                  ຂຽນ <code>ໂຕລະ25ພັນ</code> ກໍ່ໄດ້ — ຄຳ ພັນ/ໝື່ນ/ແສນ
+                  ຈະບໍ່ຖືກນັບເປັນຕົວເລກ
+                </div>
+                <div class="rule">
+                  <code>23-20</code> — 2 ຈຳນວນ ບໍ່ມີ = → ເລກ 23 ລາຄາ 20
                 </div>
                 <div class="rule">
                   <code>22.62=5ອ້າຍລອງ</code> — ຊື່ຕໍ່ທ້າຍ = ຊື່ຂອງຊຸດນັ້ນ
@@ -1631,6 +1636,12 @@
         if (m && (hadPrefix || isPhoneName(m[1]) || isPersonName(m[1], m[2]))) {
           sender = m[1].trim();
           s = m[2].trim();
+        } else if (hadPrefix) {
+          const only = s.match(/^([^:\n]{1,40}):\s*$/);
+          if (only) {
+            sender = only[1].trim();
+            s = "";
+          }
         }
         return { t: s.trim(), newMsg: hadPrefix, time, sender };
       }
@@ -1642,6 +1653,8 @@
          ຫຼັກການ: 1 ຂໍ້ຄວາມແຊັດ = 1 ຊຸດ (set/bill)
          ແຖວທີ່ຍັງບໍ່ມີລາຄາ ຈະລໍຖ້າແຖວ "ໂຕລະ20 / ປ່ອງ20" ຫຼື ເອົາລາຄາແຖວກ່ອນໜ້າ */
       const PRICE_WORD = /^(ໂຕລະ|ຕົວລະ|ໂຕ|ຕົວ|ປ່ອງ|ຫົວລະ|ตัวละ|ตัว|ช่อง|ต่อตัว)$/;
+      // ຄຳໜ່ວຍທີ່ຄົນຂຽນຕໍ່ທ້າຍລາຄາ ເຊັ່ນ "ໂຕລະ25ພັນ" → ຖືເປັນ 25
+      const UNIT_WORD = /(ພັນ|ໝື່ນ|ຫມື່ນ|ແສນ|ລ້ານ|พัน|หมื่น|แสน|ล้าน|k)\s*$/i;
       function segSet(seg, patch) {
         segMeta[seg] = Object.assign({}, segMeta[seg] || {}, patch);
       }
@@ -1652,10 +1665,28 @@
       }
 
       function processText(text) {
-        const real = String(text)
+        const raw = String(text)
           .split(/\r?\n/)
-          .map((l) => stripChat(l))
-          .filter((o) => o.t);
+          .map((l) => stripChat(l));
+        // ແຖວຫົວຂໍ້ຄວາມທີ່ບໍ່ມີເນື້ອຫາ ("[6:07 PM] Koud:") →
+        // ຍົກເວລາ/ຜູ້ສົ່ງໄປໃສ່ແຖວທຳອິດຂອງຂໍ້ຄວາມນັ້ນ
+        const real = [];
+        let carry = null;
+        raw.forEach((o) => {
+          if (!o.t) {
+            if (o.newMsg) carry = o;
+            return;
+          }
+          if (carry) {
+            if (!o.newMsg) {
+              o.newMsg = true;
+              o.time = carry.time;
+              o.sender = carry.sender;
+            }
+            carry = null;
+          }
+          real.push(o);
+        });
         if (!real.length) return 0;
         const single = real.length === 1; // ພິມເອງແຖວດຽວ → ເອົາຂຶ້ນເທິງສຸດ
         const startLen = rows.length;
@@ -1736,11 +1767,12 @@
             /ລວມ|รวม/.test(line) ||
             (LAO_THAI.test(line) &&
               /\d/.test(line) &&
-              /[\d\u0e3f]\s*$/.test(line) &&
+              (/[\d\u0e3f]\s*$/.test(line) || UNIT_WORD.test(line)) &&
               !bet0);
           if (wordNum) {
             const isLuam = /ລວມ|รวม/.test(line);
             const word = line
+              .replace(UNIT_WORD, "")
               .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭|THB|LAK)\s*$/i, "")
               .replace(/[\d\u0e3f\s.x*\u00d7]+$/, "")
               .replace(/[=:]\s*$/, "")
@@ -2626,7 +2658,7 @@
         showInstallBtn(false);
       }
       /* ---------- ອັບເດດອັດຕະໂນມັດ + ບັງຄັບອັບເດດ ---------- */
-      const APP_VERSION = "2026.07.20-5";
+      const APP_VERSION = "2026.07.20-6";
       let swReg = null;
       let updShown = false;
 
