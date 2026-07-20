@@ -955,6 +955,44 @@
         color: #7c2d12;
       }
 
+      /* ---------- ແຈ້ງເຕືອນເວີຊັນໃໝ່ ---------- */
+      .upd {
+        position: fixed;
+        left: 18px;
+        bottom: 18px;
+        z-index: 150;
+        background: var(--em-900);
+        color: #fff;
+        border-radius: 14px;
+        padding: 13px 16px;
+        display: none;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 12px 34px rgba(4, 61, 49, 0.4);
+        font-size: 15px;
+      }
+      .upd.show {
+        display: flex;
+      }
+      .upd button {
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 10px;
+        padding: 9px 16px;
+        background: var(--em-500);
+        color: #04352b;
+        cursor: pointer;
+      }
+      .ver {
+        font-family: var(--num);
+        font-size: 11.5px;
+        color: #9db5ac;
+        text-align: center;
+        margin-top: 14px;
+      }
+
       /* ---------- overlay ---------- */
       .overlay {
         position: fixed;
@@ -1162,6 +1200,7 @@
         </div>
         <div class="ov-hist-title">ປະຫວັດໃບໂພຍ</div>
         <div id="histList"></div>
+        <div class="ver" id="verLine"></div>
       </div>
     </div>
 
@@ -1273,6 +1312,11 @@
                   ວາງຈາກແຊັດໄດ້ເລີຍ — ຫົວແບບ
                   <code>[10:37 PM] ຊື່:</code> ຈະຖືກຕັດອອກໃຫ້ອັດຕະໂນມັດ
                   ແລະ ນັບເປັນກ້ອນໃໝ່
+                </div>
+                <div class="rule">
+                  <code>228/268/28/68=5</code> — ຂັ້ນດ້ວຍ <code>/</code>
+                  <code>-</code> <code>.</code> ກໍ່ໄດ້<br />4 ຕົວ ຍອດ
+                  <span class="res">20</span>
                 </div>
                 <div class="rule">
                   ໝາຍ <code>:</code> ໃຊ້ແທນ <code>=</code> ໄດ້ —
@@ -1392,6 +1436,11 @@
       </div>
     </div>
 
+    <div class="upd" id="updBar">
+      <span>ມີເວີຊັນໃໝ່ພ້ອມແລ້ວ</span>
+      <button onclick="location.reload()">ໂຫຼດໃໝ່</button>
+    </div>
+
     <div class="mobbar">
       <div>
         <div class="k">ລວມກີບ</div>
@@ -1460,7 +1509,8 @@
         const hasSep = /[=:]/.test(line);
         const hasMul = MUL.test(line);
         return (
-          /^\d/.test(line) && (hasSep || hasMul || /^\d+\s*[-.]\s*\d/.test(line))
+          /^\d/.test(line) &&
+          (hasSep || hasMul || /^\d+\s*[-.\/]\s*\d/.test(line))
         );
       }
       function parseBet(line) {
@@ -1469,7 +1519,9 @@
         let hint = null;
         const hm = line.match(/(?:ເປັນ|เป็น)\s*(\d+)/);
         if (hm) hint = toNum(hm[1]);
-        let core = (line.match(/^[0-9=:x*.,\-\s\u00d7\u2715\u2716]+/i) || [""])[0].trim();
+        let core = (line.match(/^[0-9=:x*.,\-\/\s\u00d7\u2715\u2716]+/i) || [
+          "",
+        ])[0].trim();
         core = core.replace(/:/g, "=");
         let nums = "",
           top = 0,
@@ -1479,7 +1531,7 @@
           const parts = core.split("=");
           const left = parts[0];
           const right = parts.slice(1).join("=");
-          nums = left.split(/[-,.\s]+/).filter(Boolean).join("-");
+          nums = left.split(/[-,.\/\s]+/).filter(Boolean).join("-");
           if (!right.replace(/[^\d]/g, "")) {
             // ເຊັ່ນ 49=  (ບໍ່ໄດ້ຂຽນລາຄາ) → ໃຊ້ລາຄາອັນກ່ອນໜ້າ
             inherit = true;
@@ -1495,11 +1547,11 @@
         } else if (MUL.test(core)) {
           // ເຊັ່ນ 11-51-91x20 → ໝາຍ x ບໍ່ມີລາຄາທີ 2 = ບົນ ແລະ ລຸ່ມ ເທົ່າກັນ
           const parts = core.split(MUL).filter((s) => s.trim() !== "");
-          nums = parts[0].split(/[-,.\s]+/).filter(Boolean).join("-");
+          nums = parts[0].split(/[-,.\/\s]+/).filter(Boolean).join("-");
           top = parts.length > 1 ? toNum(parts[1]) : 0;
           bottom = parts.length > 2 ? toNum(parts[2]) : top;
         } else {
-          const parts = core.split(/[-,.\s]+/).filter(Boolean);
+          const parts = core.split(/[-,.\/\s]+/).filter(Boolean);
           if (parts.length === 2) {
             nums = parts[0];
             top = toNum(parts[1]);
@@ -1535,8 +1587,12 @@
         );
         if (s !== before) hadPrefix = true;
         // ຊື່ຜູ້ສົ່ງ ເຊັ່ນ "Sone Tv: ..."
+        // ຊື່ຜູ້ສົ່ງ ອາດເປັນເບີໂທ (+856 20 55 519 256:) ຫຼື ຊື່ຄົນ
         const m = s.match(/^([^:\n]{1,40}):\s*(.+)$/);
-        if (m && !/\d/.test(m[1]) && (hadPrefix || isBetLine(m[2].trim()))) {
+        if (
+          m &&
+          (hadPrefix || (!/\d/.test(m[1]) && isBetLine(m[2].trim())))
+        ) {
           s = m[2].trim();
         }
         return { t: s.trim(), newMsg: hadPrefix };
@@ -2377,9 +2433,58 @@
         deferredPrompt = null;
         showInstallBtn(false);
       }
+      /* ---------- ອັບເດດອັດຕະໂນມັດ ---------- */
+      const APP_VERSION = "2026.07.20-3";
+      let swReg = null;
+      let reloading = false;
+      function safeToReload() {
+        // ຢ່າໂຫຼດໃໝ່ຕອນຜູ້ໃຊ້ກຳລັງພິມຄ້າງໄວ້
+        return !(entry && entry.value.trim());
+      }
+      function updateReady() {
+        if (safeToReload()) {
+          if (reloading) return;
+          reloading = true;
+          location.reload();
+        } else {
+          const b = document.getElementById("updBar");
+          if (b) b.classList.add("show");
+        }
+      }
       if ("serviceWorker" in navigator && location.protocol !== "file:") {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").catch(() => {});
+        window.addEventListener("load", async () => {
+          try {
+            swReg = await navigator.serviceWorker.register("./sw.js");
+            swReg.addEventListener("updatefound", () => {
+              const nw = swReg.installing;
+              if (!nw) return;
+              nw.addEventListener("statechange", () => {
+                if (
+                  nw.state === "installed" &&
+                  navigator.serviceWorker.controller
+                )
+                  updateReady();
+              });
+            });
+            // ກວດຫາເວີຊັນໃໝ່ ທຸກ 15 ນາທີ ແລະ ທຸກຄັ້ງທີ່ກັບມາເປີດແອັບ
+            setInterval(() => swReg.update().catch(() => {}), 15 * 60 * 1000);
+            document.addEventListener("visibilitychange", () => {
+              if (!document.hidden && swReg) swReg.update().catch(() => {});
+            });
+            window.addEventListener("online", () => {
+              if (swReg) swReg.update().catch(() => {});
+            });
+          } catch (e) {}
+        });
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (reloading) return;
+          if (safeToReload()) {
+            reloading = true;
+            location.reload();
+          } else {
+            const b = document.getElementById("updBar");
+            if (b) b.classList.add("show");
+          }
         });
       }
 
@@ -2621,6 +2726,8 @@
       }
 
       function startApp(exp) {
+        const v = document.getElementById("verLine");
+        if (v) v.textContent = "ເວີຊັນ " + APP_VERSION;
         paintExpiry(exp);
         renderAll();
         updateSessionBadge();
