@@ -1436,9 +1436,18 @@
       </div>
     </div>
 
-    <div class="upd" id="updBar">
-      <span>ມີເວີຊັນໃໝ່ພ້ອມແລ້ວ</span>
-      <button onclick="location.reload()">ໂຫຼດໃໝ່</button>
+    <div class="lic" id="updModal" style="z-index: 300">
+      <div class="lic-card">
+        <div style="font-size: 46px; line-height: 1">⬆</div>
+        <h1 class="lic-title" style="margin-top: 8px">ມີເວີຊັນໃໝ່</h1>
+        <div class="lic-sub" id="updSub">
+          ກະລຸນາອັບເດດກ່ອນໃຊ້ງານ<br />ຂໍ້ມູນໂພຍຂອງທ່ານຈະບໍ່ຫາຍ
+        </div>
+        <button class="lic-btn" id="updBtn" onclick="doUpdate()">
+          ອັບເດດດຽວນີ້
+        </button>
+        <div class="ver" id="updVer"></div>
+      </div>
     </div>
 
     <div class="mobbar">
@@ -1572,6 +1581,16 @@
 
       /* ---------- ຕັດຫົວຂໍ້ຄວາມແຊັດ (WhatsApp / Messenger) ອອກ ----------
          ເຊັ່ນ  "[10:37 PM, 7/16/2026] Sone Tv: 11:2x2"  →  "11:2x2" */
+      /* ເບີໂທ: ຕ້ອງຂຶ້ນຕົ້ນດ້ວຍ + ຫຼື ມີຊ່ອງວ່າງ ແລະ ຍາວພໍສົມຄວນ
+         → ກັນບໍ່ໃຫ້ໄປຕັດເລກໂພຍ ເຊັ່ນ 11:2x2 ຫຼື 507-547-587:30 */
+      function isPhoneName(name) {
+        const n = String(name).trim();
+        if (!/^\+?\d[\d\s().-]{7,}$/.test(n)) return false;
+        return /^\+/.test(n) || /\s/.test(n);
+      }
+      function isPersonName(name, rest) {
+        return !/\d/.test(name) && isBetLine(String(rest).trim());
+      }
       function stripChat(line) {
         let s = String(line).trim();
         let hadPrefix = false;
@@ -1589,10 +1608,7 @@
         // ຊື່ຜູ້ສົ່ງ ເຊັ່ນ "Sone Tv: ..."
         // ຊື່ຜູ້ສົ່ງ ອາດເປັນເບີໂທ (+856 20 55 519 256:) ຫຼື ຊື່ຄົນ
         const m = s.match(/^([^:\n]{1,40}):\s*(.+)$/);
-        if (
-          m &&
-          (hadPrefix || (!/\d/.test(m[1]) && isBetLine(m[2].trim())))
-        ) {
+        if (m && (hadPrefix || isPhoneName(m[1]) || isPersonName(m[1], m[2]))) {
           s = m[2].trim();
         }
         return { t: s.trim(), newMsg: hadPrefix };
@@ -2433,24 +2449,69 @@
         deferredPrompt = null;
         showInstallBtn(false);
       }
-      /* ---------- ອັບເດດອັດຕະໂນມັດ ---------- */
-      const APP_VERSION = "2026.07.20-3";
+      /* ---------- ອັບເດດອັດຕະໂນມັດ + ບັງຄັບອັບເດດ ---------- */
+      const APP_VERSION = "2026.07.20-4";
       let swReg = null;
-      let reloading = false;
-      function safeToReload() {
-        // ຢ່າໂຫຼດໃໝ່ຕອນຜູ້ໃຊ້ກຳລັງພິມຄ້າງໄວ້
-        return !(entry && entry.value.trim());
+      let updShown = false;
+
+      function saveDraft() {
+        try {
+          localStorage.setItem("poy_draft", entry ? entry.value : "");
+        } catch (e) {}
       }
-      function updateReady() {
-        if (safeToReload()) {
-          if (reloading) return;
-          reloading = true;
-          location.reload();
-        } else {
-          const b = document.getElementById("updBar");
-          if (b) b.classList.add("show");
+      function restoreDraft() {
+        try {
+          const d = localStorage.getItem("poy_draft");
+          if (d && entry && !entry.value) {
+            entry.value = d;
+            autoGrow();
+            updatePreview();
+          }
+          localStorage.removeItem("poy_draft");
+        } catch (e) {}
+      }
+
+      function forceUpdate(newVer) {
+        if (updShown) return;
+        updShown = true;
+        const m = document.getElementById("updModal");
+        const v = document.getElementById("updVer");
+        if (v)
+          v.textContent =
+            "ຂອງທ່ານ " + APP_VERSION + (newVer ? "  →  ໃໝ່ " + newVer : "");
+        if (m) m.classList.add("show");
+      }
+      async function doUpdate() {
+        const b = document.getElementById("updBtn");
+        if (b) {
+          b.disabled = true;
+          b.textContent = "ກຳລັງອັບເດດ...";
         }
+        saveDraft();
+        try {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        } catch (e) {}
+        try {
+          if (swReg) await swReg.update();
+        } catch (e) {}
+        setTimeout(() => location.reload(), 250);
       }
+
+      /* ກວດເວີຊັນຈາກ version.json — ໃຊ້ໄດ້ເຖິງ service worker ຈະບໍ່ທັນ */
+      async function checkVersion() {
+        if (location.protocol === "file:") return;
+        try {
+          const res = await fetch("./version.json?t=" + Date.now(), {
+            cache: "no-store",
+          });
+          if (!res.ok) return;
+          const j = await res.json();
+          if (j && j.version && j.version !== APP_VERSION)
+            forceUpdate(j.version);
+        } catch (e) {}
+      }
+
       if ("serviceWorker" in navigator && location.protocol !== "file:") {
         window.addEventListener("load", async () => {
           try {
@@ -2463,30 +2524,25 @@
                   nw.state === "installed" &&
                   navigator.serviceWorker.controller
                 )
-                  updateReady();
+                  forceUpdate();
               });
             });
-            // ກວດຫາເວີຊັນໃໝ່ ທຸກ 15 ນາທີ ແລະ ທຸກຄັ້ງທີ່ກັບມາເປີດແອັບ
             setInterval(() => swReg.update().catch(() => {}), 15 * 60 * 1000);
-            document.addEventListener("visibilitychange", () => {
-              if (!document.hidden && swReg) swReg.update().catch(() => {});
-            });
-            window.addEventListener("online", () => {
-              if (swReg) swReg.update().catch(() => {});
-            });
           } catch (e) {}
         });
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-          if (reloading) return;
-          if (safeToReload()) {
-            reloading = true;
-            location.reload();
-          } else {
-            const b = document.getElementById("updBar");
-            if (b) b.classList.add("show");
-          }
-        });
+        navigator.serviceWorker.addEventListener("controllerchange", () =>
+          forceUpdate(),
+        );
       }
+      // ກວດທຸກຄັ້ງທີ່ກັບມາເປີດແອັບ / ເນັດກັບມາ / ທຸກ 15 ນາທີ
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          checkVersion();
+          if (swReg) swReg.update().catch(() => {});
+        }
+      });
+      window.addEventListener("online", () => checkVersion());
+      setInterval(checkVersion, 15 * 60 * 1000);
 
       /* ================= ລະບົບເປີດໃຊ້ງານ (License) ================= */
       const LIC_URL = "./licenses.json";
@@ -2728,6 +2784,8 @@
       function startApp(exp) {
         const v = document.getElementById("verLine");
         if (v) v.textContent = "ເວີຊັນ " + APP_VERSION;
+        checkVersion();
+        restoreDraft();
         paintExpiry(exp);
         renderAll();
         updateSessionBadge();

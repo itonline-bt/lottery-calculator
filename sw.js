@@ -1,6 +1,6 @@
 /* ຄິດໄລ່ໂພຍ — service worker
    ເກັບໄຟລ໌ໄວ້ໃນເຄື່ອງ ເພື່ອໃຫ້ເປີດໃຊ້ໄດ້ ເຖິງບໍ່ມີອິນເຕີເນັດ */
-const VERSION = "poy-2026.07.20-3";
+const VERSION = "poy-2026.07.20-4";
 const SHELL = VERSION + "-shell";
 const RUNTIME = VERSION + "-runtime";
 
@@ -55,6 +55,7 @@ self.addEventListener("fetch", (e) => {
   // ໄຟລ໌ລະຫັດ: ຫ້າມເກັບ cache ເດັດຂາດ ຕ້ອງເອົາຈາກເນັດສະເໝີ
   if (
     url.pathname.endsWith("/licenses.json") ||
+    url.pathname.endsWith("/version.json") ||
     url.pathname.endsWith("/owner.html")
   ) {
     e.respondWith(fetch(req, { cache: "no-store" }));
