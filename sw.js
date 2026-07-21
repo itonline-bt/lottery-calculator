@@ -1,6 +1,6 @@
 /* ຄິດໄລ່ໂພຍ — service worker
    ເກັບໄຟລ໌ໄວ້ໃນເຄື່ອງ ເພື່ອໃຫ້ເປີດໃຊ້ໄດ້ ເຖິງບໍ່ມີອິນເຕີເນັດ */
-const VERSION = "poy-2026.07.20-12";
+const VERSION = "poy-2026.07.20-13";
 const SHELL = VERSION + "-shell";
 const RUNTIME = VERSION + "-runtime";
 
@@ -56,7 +56,8 @@ self.addEventListener("fetch", (e) => {
   if (
     url.pathname.endsWith("/licenses.json") ||
     url.pathname.endsWith("/version.json") ||
-    url.pathname.endsWith("/owner.html")
+    url.pathname.endsWith("/owner.html") ||
+    url.pathname.endsWith("/dashboard.html")
   ) {
     e.respondWith(fetch(req, { cache: "no-store" }));
     return;
