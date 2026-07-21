@@ -2654,7 +2654,8 @@
       }
 
       /* ---------- Excel ---------- */
-      function buildAOA() {
+      /* ---------- ຂໍ້ມູນສຳລັບ Excel 3 ຊີດ ---------- */
+      function sheetDetail() {
         const segs = segList();
         const nameOf = {};
         segs.forEach((sg, i) => (nameOf[sg] = segTitle(sg, i)));
@@ -2684,16 +2685,78 @@
             curName(r.cur),
           ]);
         });
+        return aoa;
+      }
+      function sheetSets() {
+        const segs = segList();
+        const aoa = [];
+        aoa.push(["ສະຫຼຸບຕາມຊຸດ"]);
         aoa.push([]);
+        aoa.push([
+          "ຊຸດ",
+          "ເວລາ",
+          "ຜູ້ສົ່ງ",
+          "ຈຳນວນລາຍການ",
+          "ຈຳນວນຕົວ",
+          "ຍອດລວມ",
+          "ສະກຸນ",
+          "ຍອດທີ່ຂຽນໃນໂພຍ",
+          "ສະຖານະ",
+        ]);
+        segs.forEach((sg, i) => {
+          const m = segMeta[sg] || {};
+          const gr = rows.filter((r) => r.seg === sg);
+          let cnt = 0;
+          gr.forEach((r) => (cnt += countNums(r.nums) || 1));
+          const sum = segTotal(sg);
+          const stated = toNum(m.stated);
+          aoa.push([
+            segTitle(sg, i),
+            m.time || "",
+            m.sender || "",
+            gr.length,
+            cnt,
+            sum,
+            curName((gr[0] && gr[0].cur) || m.cur || "LAK"),
+            stated || "",
+            stated ? (sameAmount(sum, stated) ? "ກົງກັນ" : "ບໍ່ກົງ") : "",
+          ]);
+        });
+        return aoa;
+      }
+      function sheetTotal() {
         let lak = 0,
-          thb = 0;
+          thb = 0,
+          top = 0,
+          bot = 0,
+          cnt = 0;
         rows.forEach((r) => {
+          const c = countNums(r.nums) || 1;
+          cnt += c;
+          top += toNum(r.top) * c;
+          bot += toNum(r.bottom) * c;
           if (r.cur === "THB") thb += rowTotal(r);
           else lak += rowTotal(r);
         });
-        aoa.push(["ລວມກີບ (₭)", "", lak]);
-        aoa.push(["ລວມບາດ (฿)", "", thb]);
+        const aoa = [];
+        aoa.push(["ຍອດລວມ — " + (currentName || "")]);
+        aoa.push(["ອອກເມື່ອ", new Date().toLocaleString("en-GB")]);
+        aoa.push([]);
+        aoa.push(["ລາຍການ", "ຈຳນວນ"]);
+        aoa.push(["ລວມກີບ (₭)", lak]);
+        aoa.push(["ລວມບາດ (฿)", thb]);
+        aoa.push([]);
+        aoa.push(["ຈຳນວນຊຸດ", segList().length]);
+        aoa.push(["ຈຳນວນແຖວ", rows.length]);
+        aoa.push(["ຈຳນວນຕົວ", cnt]);
+        aoa.push(["ລວມເງິນບົນ", top]);
+        aoa.push(["ລວມເງິນລຸ່ມ", bot]);
         return aoa;
+      }
+      function buildAOA() {
+        // ໃຊ້ຕອນດາວໂຫຼດເປັນ CSV (ຮວມ 3 ສ່ວນໄວ້ໄຟລ໌ດຽວ)
+        return sheetDetail()
+          .concat([[]], sheetSets(), [[]], sheetTotal());
       }
       function loadXLSX() {
         return new Promise((res) => {
@@ -2723,23 +2786,44 @@
           alert("ຍັງບໍ່ມີລາຍການໃຫ້ດາວໂຫຼດ");
           return;
         }
-        const aoa = buildAOA();
         const ok = await loadXLSX();
         if (ok && window.XLSX) {
-          const ws = XLSX.utils.aoa_to_sheet(aoa);
-          ws["!cols"] = [
+          const wb = XLSX.utils.book_new();
+
+          const ws1 = XLSX.utils.aoa_to_sheet(sheetDetail());
+          ws1["!cols"] = [
             { wch: 18 },
-            { wch: 18 },
+            { wch: 20 },
+            { wch: 24 },
             { wch: 10 },
             { wch: 8 },
             { wch: 8 },
             { wch: 12 },
             { wch: 8 },
           ];
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "ໂພຍ");
+          XLSX.utils.book_append_sheet(wb, ws1, "ລາຍການ");
+
+          const ws2 = XLSX.utils.aoa_to_sheet(sheetSets());
+          ws2["!cols"] = [
+            { wch: 18 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 12 },
+            { wch: 10 },
+            { wch: 12 },
+            { wch: 8 },
+            { wch: 16 },
+            { wch: 10 },
+          ];
+          XLSX.utils.book_append_sheet(wb, ws2, "ຊຸດ");
+
+          const ws3 = XLSX.utils.aoa_to_sheet(sheetTotal());
+          ws3["!cols"] = [{ wch: 22 }, { wch: 16 }];
+          XLSX.utils.book_append_sheet(wb, ws3, "ຍອດລວມ");
+
           XLSX.writeFile(wb, "poy_" + fileStamp() + ".xlsx");
         } else {
+          const aoa = buildAOA();
           const esc = (v) => {
             v = v == null ? "" : String(v);
             return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
@@ -3016,7 +3100,7 @@
         showInstallBtn(false);
       }
       /* ---------- ອັບເດດອັດຕະໂນມັດ + ບັງຄັບອັບເດດ ---------- */
-      const APP_VERSION = "2026.07.21-16";
+      const APP_VERSION = "2026.07.21-17";
       let swReg = null;
       let updShown = false;
 
