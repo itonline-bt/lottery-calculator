@@ -11,9 +11,9 @@ lottery-calculator/          ← root ຂອງ repo
 ├── assets/                  ← ໄອຄອນ
 │
 ├── admin/                   ← ສະເພາະເຈົ້າຂອງລະບົບ
-│   ├── index.html           ← ໜ້າເມນູ
-│   ├── owner.html           ← ຈັດການລູກຄ້າ / License
-│   └── dashboard.html       ← ພາບລວມ / ກວດເລກທີ່ອອກ
+│   ├── index.html           ← ລະບົບຈັດການ (nav ຊ້າຍມື · 7 ໜ້າໃນໄຟລ໌ດຽວ)
+│   ├── owner.html           ← ລິ້ງເກົ່າ → ພາໄປ index.html#licenses
+│   └── dashboard.html       ← ລິ້ງເກົ່າ → ພາໄປ index.html#overview
 │
 ├── START-WINDOWS.bat        ← ເປີດເຊີບເວີໃນເຄື່ອງ
 ├── server.ps1
