@@ -1,0 +1,3473 @@
+<!doctype html>
+<html lang="lo">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ຄິດໄລ່ໂພຍ · Lottery Calculator</title>
+    <meta name="theme-color" content="#047857" />
+    <meta name="description" content="ຄິດໄລ່ຍອດໂພຍ ແຍກ ບົນ/ລຸ່ມ ກີບ/ບາດ ແລະ ກວດຍອດຕາມບິນ" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./assets/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ຄິດໄລ່ໂພຍ" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --em-900: #043d31;
+        --em-800: #065f46;
+        --em-700: #047857;
+        --em-600: #059669;
+        --em-500: #10b981;
+        --em-100: #d1fae5;
+        --em-50: #ecfdf5;
+
+        --ink: #08221b;
+        --ink-2: #234b40;
+        --muted: #5f7d73;
+        --line: #d7e5df;
+        --line-2: #e9f2ee;
+        --page: #eef4f1;
+        --surface: #ffffff;
+        --panel: #f4f9f7;
+
+        --top: #0f766e;
+        --top-bg: #e0f2f0;
+        --bottom: #b45309;
+        --bottom-bg: #fdf1e0;
+        --thb: #4338ca;
+        --thb-bg: #e8e9fd;
+        --bad: #d24141;
+        --bad-bg: #fbeaea;
+
+        --num: "JetBrains Mono", ui-monospace, monospace;
+        --r: 16px;
+        --sh: 0 1px 2px rgba(6, 95, 70, 0.06), 0 10px 30px rgba(6, 95, 70, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+      body {
+        background: var(--page);
+        color: var(--ink);
+        font-family: "Noto Sans Lao", system-ui, sans-serif;
+        font-size: 17px;
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      /* ---------- topbar ---------- */
+      .topbar {
+        background: linear-gradient(115deg, var(--em-900), var(--em-700) 55%, var(--em-600));
+        color: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        box-shadow: 0 3px 18px rgba(4, 61, 49, 0.28);
+      }
+      .topbar-in {
+        width: 100%;
+        padding: 14px 26px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .brand {
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 0.3px;
+        margin: 0;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .brand::before {
+        content: "";
+        width: 12px;
+        height: 26px;
+        border-radius: 4px;
+        background: var(--em-500);
+        box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
+      }
+      .sess {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #fff;
+        font-family: inherit;
+        border-radius: 999px;
+        padding: 7px 16px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        max-width: 34vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .sess:hover {
+        background: rgba(255, 255, 255, 0.26);
+      }
+      .top-tot {
+        margin-left: auto;
+        display: flex;
+        gap: 10px;
+      }
+      .top-tot .t {
+        background: rgba(255, 255, 255, 0.13);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 12px;
+        padding: 5px 16px;
+        text-align: right;
+        line-height: 1.2;
+      }
+      .top-tot .k {
+        font-size: 11.5px;
+        opacity: 0.8;
+      }
+      .top-tot .v {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        font-size: 20px;
+      }
+      .topbtn {
+        background: #fff;
+        color: var(--em-800);
+        border: none;
+        border-radius: 999px;
+        padding: 11px 20px;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .topbtn:hover {
+        background: var(--em-50);
+      }
+      .topbtn.install {
+        background: var(--em-500);
+        color: #04352b;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+      }
+      .topbtn.install:hover {
+        background: #34d399;
+      }
+      /* ເວລາເປີດແບບແອັບ (ບໍ່ມີແຖບເບຣົາເຊີ) */
+      @media (display-mode: standalone) {
+        .topbar {
+          padding-top: env(safe-area-inset-top);
+        }
+      }
+      @media (max-width: 1100px) {
+        .top-tot {
+          display: none;
+        }
+      }
+
+      .wrap {
+        width: 100%;
+        padding: 20px 26px 40px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 400px;
+        gap: 20px;
+        align-items: start;
+      }
+      .col-main {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+      }
+      .col-side {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        position: sticky;
+        top: 86px;
+      }
+      @media (max-width: 1000px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .col-side {
+          position: static;
+        }
+        .wrap {
+          padding: 16px 14px 120px;
+        }
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--r);
+        padding: 18px 20px;
+        box-shadow: var(--sh);
+      }
+      .card-h {
+        font-size: 15px;
+        margin: 0 0 14px;
+        font-weight: 800;
+        color: var(--em-800);
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .card-h .hint {
+        font-weight: 500;
+        font-size: 13.5px;
+        color: var(--muted);
+      }
+
+      /* ---------- entry ---------- */
+      .entry {
+        border-color: #b9e3d3;
+        background: linear-gradient(180deg, var(--em-50), #ffffff 65%);
+        /* ຄ້າງໄວ້ເທິງສຸດ ຄືກັບກ່ອງສະຫຼຸບຍອດ */
+        position: sticky;
+        top: var(--stick, 68px);
+        z-index: 30;
+      }
+      .entry.stuck {
+        box-shadow:
+          0 1px 2px rgba(6, 95, 70, 0.06),
+          0 14px 28px rgba(6, 95, 70, 0.16);
+      }
+      .entry-box {
+        border: 2.5px solid var(--em-600);
+        border-radius: 14px;
+        background: #fff;
+        overflow: hidden;
+        transition: box-shadow 0.15s;
+      }
+      .entry-box:focus-within {
+        box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.2);
+      }
+      #entryIn {
+        display: block;
+        width: 100%;
+        border: none;
+        outline: none;
+        resize: none;
+        padding: 16px 18px;
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.55;
+        letter-spacing: 0.5px;
+        color: var(--ink);
+        background: transparent;
+        min-height: 62px;
+        max-height: 34vh;
+      }
+      #entryIn::placeholder {
+        font-family: "Noto Sans Lao", sans-serif;
+        font-weight: 400;
+        font-size: 16px;
+        letter-spacing: 0;
+        color: #9db5ac;
+      }
+      .entry-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 12px;
+        border-top: 1px solid var(--line-2);
+        background: var(--panel);
+        flex-wrap: wrap;
+      }
+      .curtoggle {
+        display: flex;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 4px;
+        gap: 4px;
+      }
+      .curtoggle button {
+        border: none;
+        background: transparent;
+        border-radius: 9px;
+        padding: 9px 18px;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .curtoggle button.on.lak {
+        background: var(--em-100);
+        color: var(--em-800);
+      }
+      .curtoggle button.on.thb {
+        background: var(--thb-bg);
+        color: var(--thb);
+      }
+      /* ---------- ບັດຕົວຢ່າງກ່ອນເພີ່ມ ---------- */
+      .pv-wrap {
+        margin-top: 12px;
+        display: grid;
+        gap: 9px;
+        grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+        max-height: 30vh;
+        overflow: auto;
+      }
+      .pv {
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--em-500);
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      .pv-h {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        justify-content: space-between;
+      }
+      .pv-name {
+        font-weight: 800;
+        font-size: 15px;
+        color: var(--em-800);
+      }
+      .pv-sum {
+        font-family: var(--num);
+        font-weight: 800;
+        font-size: 16px;
+      }
+      .pv-time {
+        font-family: var(--num);
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .pv-lines {
+        font-family: var(--num);
+        font-size: 12.5px;
+        color: var(--ink-2);
+        margin-top: 7px;
+        line-height: 1.65;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .pv-more {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .pv.warn {
+        border-left-color: #e0a33a;
+      }
+      .chk {
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .chk.ok {
+        color: var(--em-700);
+      }
+      .chk.bad {
+        color: #c2410c;
+      }
+      .preview {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-size: 16px;
+        color: var(--muted);
+        padding: 0 6px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+      }
+      .preview b {
+        color: var(--em-700);
+        font-size: 19px;
+      }
+      .btn {
+        font-family: inherit;
+        font-size: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--ink-2);
+        padding: 11px 18px;
+        cursor: pointer;
+        font-weight: 700;
+        transition: 0.12s;
+        white-space: nowrap;
+      }
+      .btn:hover {
+        background: var(--em-50);
+        border-color: var(--em-500);
+      }
+      .btn.primary {
+        background: var(--em-700);
+        border-color: var(--em-700);
+        color: #fff;
+        font-size: 17px;
+        padding: 12px 26px;
+      }
+      .btn.primary:hover {
+        background: var(--em-800);
+      }
+      .btn.ghost {
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+      }
+      .btn.ghost:hover {
+        background: var(--bad-bg);
+        color: var(--bad);
+        border-color: transparent;
+      }
+      .btn.mini {
+        padding: 8px 15px;
+        font-size: 14.5px;
+        border-radius: 10px;
+      }
+      .btn.on {
+        background: var(--em-100);
+        border-color: var(--em-500);
+        color: var(--em-800);
+      }
+      .btn:focus-visible,
+      .sess:focus-visible,
+      .topbtn:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid var(--em-500);
+        outline-offset: 2px;
+      }
+
+      .rules {
+        margin-top: 14px;
+        border: 1px dashed #a9d9c6;
+        border-radius: 13px;
+        background: #fbfefd;
+        overflow: hidden;
+      }
+      .rules summary {
+        cursor: pointer;
+        padding: 11px 15px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--em-700);
+        list-style: none;
+      }
+      .rules summary::-webkit-details-marker {
+        display: none;
+      }
+      .rules summary::before {
+        content: "▸ ";
+      }
+      .rules[open] summary::before {
+        content: "▾ ";
+      }
+      .rules-body {
+        max-height: 46vh;
+        overflow: auto;
+        padding: 2px 15px 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 10px;
+      }
+      .rule {
+        background: #fff;
+        border: 1px solid var(--line-2);
+        border-radius: 11px;
+        padding: 11px 13px;
+        font-size: 14.5px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .rule code {
+        font-family: var(--num);
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--ink);
+        background: var(--panel);
+        border-radius: 6px;
+        padding: 2px 7px;
+      }
+      .rule .res {
+        color: var(--em-600);
+        font-weight: 800;
+        font-family: var(--num);
+      }
+
+      /* ---------- toolbar ---------- */
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--line-2);
+      }
+
+      /* ---------- table ---------- */
+      #tableWrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        min-width: 560px;
+      }
+      col.c-nums {
+        width: auto;
+      }
+      col.c-cnt {
+        width: 60px;
+      }
+      col.c-amt {
+        width: 104px;
+      }
+      col.c-tot {
+        width: 122px;
+      }
+      col.c-cur {
+        width: 66px;
+      }
+      col.c-del {
+        width: 46px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--line-2);
+        vertical-align: middle;
+      }
+      thead th {
+        font-size: 13.5px;
+        color: var(--em-800);
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        border-bottom: 2px solid var(--em-100);
+        padding: 10px 8px;
+        background: #fff;
+      }
+      th.mid,
+      td.mid {
+        text-align: center;
+      }
+      th.top-h {
+        color: var(--top);
+      }
+      th.bottom-h {
+        color: var(--bottom);
+      }
+      tbody tr {
+        scroll-margin-top: calc(var(--stick, 68px) + 16px);
+      }
+      tbody tr:hover td {
+        background: #f7fdfa;
+      }
+      tbody tr.seg-start td {
+        border-top: 3px solid var(--em-100);
+      }
+      tbody tr.flash td {
+        animation: flash 1.1s ease-out;
+      }
+      @keyframes flash {
+        from {
+          background: var(--em-100);
+        }
+        to {
+          background: transparent;
+        }
+      }
+      input.f {
+        border: 1px solid transparent;
+        background: var(--panel);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 20px;
+        width: 100%;
+        color: var(--ink);
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      input.f:hover {
+        border-color: var(--line);
+      }
+      input.f:focus {
+        outline: none;
+        border-color: var(--em-500);
+        background: #fff;
+      }
+      input.amt {
+        text-align: center;
+        font-weight: 800;
+        padding: 10px 4px;
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+      input.amt::-webkit-outer-spin-button,
+      input.amt::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input.amt.top-v {
+        color: var(--top);
+        background: var(--top-bg);
+      }
+      input.amt.bottom-v {
+        color: var(--bottom);
+        background: var(--bottom-bg);
+      }
+      .cnt {
+        font-family: var(--num);
+        color: var(--muted);
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .rowtot {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        text-align: right;
+        font-size: 21px;
+        color: var(--ink);
+      }
+      .del {
+        color: #b3c9c1;
+        border: none;
+        background: transparent;
+        font-size: 19px;
+        padding: 6px 9px;
+        border-radius: 9px;
+        cursor: pointer;
+      }
+      .del:hover {
+        background: var(--bad-bg);
+        color: var(--bad);
+      }
+      .warn {
+        color: var(--bad);
+        font-size: 13px;
+        margin-top: 3px;
+      }
+      .curtog {
+        font-family: var(--num);
+        font-weight: 800;
+        font-size: 18px;
+        border-radius: 10px;
+        padding: 9px 0;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        width: 100%;
+      }
+      .curtog.lak {
+        color: var(--em-700);
+        background: var(--em-100);
+        border-color: #a7e3cd;
+      }
+      .curtog.thb {
+        color: var(--thb);
+        background: var(--thb-bg);
+        border-color: #c7c9f7;
+      }
+
+      .empty {
+        color: var(--muted);
+        text-align: center;
+        padding: 46px 14px;
+        font-size: 17px;
+        line-height: 1.8;
+      }
+      .empty .big {
+        font-size: 44px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.35;
+      }
+      .notes {
+        font-family: var(--num);
+        font-size: 14px;
+        color: var(--muted);
+        white-space: pre-wrap;
+        background: var(--panel);
+        border-radius: 10px;
+        padding: 11px 13px;
+        margin-top: 6px;
+      }
+      .notes-label {
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 16px;
+        font-weight: 700;
+      }
+
+      /* ---------- summary ---------- */
+      .sumcard {
+        padding: 0;
+        overflow: hidden;
+      }
+      .sum-block {
+        padding: 18px 20px;
+      }
+      .sum-block + .sum-block {
+        border-top: 1px dashed var(--line);
+      }
+      .sum-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .badge {
+        font-weight: 800;
+        font-size: 16px;
+        padding: 5px 18px;
+        border-radius: 999px;
+      }
+      .badge.lak {
+        background: var(--em-100);
+        color: var(--em-800);
+      }
+      .badge.thb {
+        background: var(--thb-bg);
+        color: var(--thb);
+      }
+      .sum-cnt {
+        font-family: var(--num);
+        font-size: 14.5px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .sum-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        font-size: 16px;
+      }
+      .sum-line .k {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .sum-line .v {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        font-size: 19px;
+      }
+      .grand {
+        margin-top: 12px;
+        background: linear-gradient(120deg, var(--em-900), var(--em-700));
+        color: #fff;
+        border-radius: 13px;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .grand.thb-g {
+        background: linear-gradient(120deg, #312e81, #4338ca);
+      }
+      .grand .g-k {
+        font-size: 14.5px;
+        opacity: 0.85;
+      }
+      .grand .g-v {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        font-size: 30px;
+      }
+
+      /* ---------- bills ---------- */
+      .bill {
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 13px 15px;
+        margin-top: 11px;
+        background: var(--panel);
+      }
+      .bill:first-child {
+        margin-top: 0;
+      }
+      .bill .h {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+      .bill .name {
+        font-weight: 700;
+        font-size: 17px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .bill .detail {
+        font-family: var(--num);
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .chip {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        padding: 4px 13px;
+        border-radius: 999px;
+        font-size: 15px;
+        white-space: nowrap;
+      }
+      .chip.ok {
+        background: var(--em-100);
+        color: var(--em-800);
+      }
+      .chip.bad {
+        background: var(--bad-bg);
+        color: var(--bad);
+      }
+      .chip.plain {
+        background: #e4ede9;
+        color: var(--ink-2);
+      }
+
+      /* ---------- mobile total bar ---------- */
+      .mobbar {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        background: linear-gradient(120deg, var(--em-900), var(--em-700));
+        color: #fff;
+        padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+        justify-content: space-around;
+        gap: 12px;
+        box-shadow: 0 -5px 22px rgba(4, 61, 49, 0.3);
+      }
+      .mobbar div {
+        text-align: center;
+        line-height: 1.25;
+      }
+      .mobbar .k {
+        font-size: 12.5px;
+        opacity: 0.8;
+      }
+      .mobbar .v {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        font-size: 22px;
+      }
+      @media (max-width: 1000px) {
+        .mobbar {
+          display: flex;
+        }
+      }
+
+      /* ---------- ໜ້າເປີດໃຊ້ງານ (license) ---------- */
+      body.locked .topbar,
+      body.locked .wrap,
+      body.locked .mobbar,
+      body.locked #overlay {
+        display: none !important;
+      }
+      .lic {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(140deg, var(--em-900), var(--em-700));
+      }
+      .lic.show {
+        display: flex;
+      }
+      .lic-card {
+        background: #fff;
+        border-radius: 22px;
+        width: 100%;
+        max-width: 460px;
+        padding: 32px 30px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+        text-align: center;
+      }
+      .lic-logo {
+        width: 84px;
+        height: 84px;
+        border-radius: 22px;
+        margin: 0 auto 14px;
+        display: block;
+      }
+      .lic-title {
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--em-800);
+        margin: 0 0 6px;
+      }
+      .lic-sub {
+        color: var(--muted);
+        font-size: 15px;
+        margin-bottom: 22px;
+        line-height: 1.6;
+      }
+      #licKey {
+        width: 100%;
+        border: 2px solid var(--line);
+        border-radius: 13px;
+        padding: 14px;
+        font-family: var(--num);
+        font-size: 21px;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+      #licKey:focus {
+        outline: none;
+        border-color: var(--em-500);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+      }
+      .lic-btn {
+        width: 100%;
+        margin-top: 12px;
+        font-family: inherit;
+        font-size: 18px;
+        font-weight: 800;
+        padding: 15px;
+        border-radius: 14px;
+        background: var(--em-700);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+      .lic-btn:hover {
+        background: var(--em-800);
+      }
+      .lic-btn[disabled] {
+        opacity: 0.55;
+        cursor: default;
+      }
+      .lic-msg {
+        white-space: pre-line;
+        margin-top: 14px;
+        font-size: 15px;
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: none;
+        line-height: 1.6;
+      }
+      .lic-msg.show {
+        display: block;
+      }
+      .lic-msg.err {
+        background: var(--bad-bg);
+        color: var(--bad);
+      }
+      .lic-msg.ok {
+        background: var(--em-100);
+        color: var(--em-800);
+      }
+      .lic-foot {
+        margin-top: 20px;
+        font-size: 13.5px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+      .lic-foot b {
+        color: var(--ink-2);
+      }
+      .lic-id {
+        font-family: var(--num);
+        font-size: 12px;
+        color: #9db5ac;
+        margin-top: 10px;
+        word-break: break-all;
+      }
+      .exp-pill {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 999px;
+        padding: 5px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .exp-pill.warn {
+        background: #fde68a;
+        border-color: #fbbf24;
+        color: #7c2d12;
+      }
+
+      /* ---------- ໜ້າໂຫຼດຕອນເປີດແອັບ ---------- */
+      .boot {
+        position: fixed;
+        inset: 0;
+        z-index: 250;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(140deg, var(--em-900), var(--em-700));
+        color: #fff;
+        text-align: center;
+      }
+      .boot.hide {
+        display: none;
+      }
+      .boot img {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+      }
+      .boot .bt {
+        font-size: 26px;
+        font-weight: 900;
+        margin-top: 16px;
+      }
+      .boot .bs {
+        font-size: 15px;
+        opacity: 0.85;
+        margin-top: 6px;
+      }
+      .spin {
+        width: 30px;
+        height: 30px;
+        margin: 22px auto 0;
+        border: 3px solid rgba(255, 255, 255, 0.28);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ---------- ແຈ້ງເຕືອນເວີຊັນໃໝ່ ---------- */
+      .upd {
+        position: fixed;
+        left: 18px;
+        bottom: 18px;
+        z-index: 150;
+        background: var(--em-900);
+        color: #fff;
+        border-radius: 14px;
+        padding: 13px 16px;
+        display: none;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 12px 34px rgba(4, 61, 49, 0.4);
+        font-size: 15px;
+      }
+      .upd.show {
+        display: flex;
+      }
+      .upd button {
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        border: none;
+        border-radius: 10px;
+        padding: 9px 16px;
+        background: var(--em-500);
+        color: #04352b;
+        cursor: pointer;
+      }
+      .ver {
+        font-family: var(--num);
+        font-size: 11.5px;
+        color: #9db5ac;
+        text-align: center;
+        margin-top: 14px;
+      }
+
+      /* ---------- overlay ---------- */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(4, 61, 49, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 20px;
+        backdrop-filter: blur(4px);
+      }
+      .ov-card {
+        background: #fff;
+        border-radius: 20px;
+        max-width: 560px;
+        width: 100%;
+        max-height: 88vh;
+        overflow: auto;
+        padding: 30px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.42);
+      }
+      .ov-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .ov-title {
+        font-size: 28px;
+        font-weight: 900;
+        margin: 0 0 6px;
+        color: var(--em-800);
+        flex: 1;
+      }
+      .ov-close {
+        flex: none;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .ov-close:hover {
+        background: var(--bad-bg);
+        color: var(--bad);
+        border-color: #f0c9c9;
+      }
+      .ov-sub {
+        color: var(--muted);
+        font-size: 15px;
+        margin-bottom: 22px;
+      }
+      .ov-start {
+        width: 100%;
+        font-family: inherit;
+        font-size: 19px;
+        font-weight: 800;
+        padding: 16px;
+        border-radius: 14px;
+        background: var(--em-700);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+      .ov-start:hover {
+        background: var(--em-800);
+      }
+      .ov-new {
+        width: 100%;
+        margin-top: 10px;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 700;
+        padding: 14px;
+        border-radius: 13px;
+        background: #fff;
+        border: 1px solid var(--line);
+        color: var(--ink-2);
+        cursor: pointer;
+      }
+      .ov-new:hover {
+        background: var(--em-50);
+      }
+      .ov-warn {
+        margin-top: 14px;
+        font-size: 14px;
+        color: var(--bottom);
+        background: var(--bottom-bg);
+        border: 1px solid #f0d9b8;
+        border-radius: 11px;
+        padding: 11px 13px;
+      }
+      .ov-hist-title {
+        margin: 26px 0 6px;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--muted);
+      }
+      .hist-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        padding: 12px 15px;
+        margin-top: 9px;
+      }
+      .hist-item:hover {
+        border-color: var(--em-500);
+        background: var(--em-50);
+      }
+      .hist-main {
+        flex: 1;
+        cursor: pointer;
+        min-width: 0;
+      }
+      .hist-name {
+        font-weight: 700;
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hist-meta {
+        font-size: 13px;
+        color: var(--muted);
+        font-family: var(--num);
+        margin-top: 3px;
+      }
+      .hist-del {
+        color: #b3c9c1;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 6px 10px;
+        border-radius: 9px;
+        flex: none;
+      }
+      .hist-del:hover {
+        background: var(--bad-bg);
+        color: var(--bad);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        tbody tr.flash td {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="lic" class="lic">
+      <div class="lic-card">
+        <img
+          class="lic-logo"
+          src="./assets/android-chrome-192x192.png"
+          alt=""
+        />
+        <h1 class="lic-title">ຄິດໄລ່ໂພຍ</h1>
+        <div class="lic-sub" id="licSub">
+          ໃສ່ລະຫັດເປີດໃຊ້ງານ (License Key)<br />ທີ່ໄດ້ຮັບຈາກຜູ້ໃຫ້ບໍລິການ
+        </div>
+        <input
+          id="licKey"
+          placeholder="POY-XXXX-XXXX-XXXX"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="lic-btn" id="licBtn" onclick="activate()">
+          ເປີດໃຊ້ງານ
+        </button>
+        <div class="lic-msg" id="licMsg"></div>
+        <div class="lic-foot">
+          ຕ້ອງຕໍ່ອິນເຕີເນັດຕອນເປີດໃຊ້ງານຄັ້ງທຳອິດ<br />
+          ຫຼັງຈາກນັ້ນໃຊ້ແບບບໍ່ມີເນັດໄດ້ <b>7 ວັນ</b> ຕໍ່ຄັ້ງ
+        </div>
+        <div class="lic-id" id="licDev"></div>
+      </div>
+    </div>
+
+    <div id="overlay" class="overlay" onclick="if(event.target===this)closeOverlay()">
+      <div class="ov-card">
+        <div class="ov-head">
+          <h2 class="ov-title">ຄິດໄລ່ໂພຍ</h2>
+          <button class="ov-close" onclick="closeOverlay()" title="ປິດ (Esc)">
+            ✕
+          </button>
+        </div>
+        <div class="ov-sub">
+          ບັນທຶກໄວ້ໃນເຄື່ອງອັດຕະໂນມັດ — ເປີດໃບເກົ່າຂຶ້ນມາເຮັດຕໍ່ໄດ້
+        </div>
+        <button class="ov-start" onclick="startResume()">ສືບຕໍ່ໃບລ່າສຸດ</button>
+        <button class="ov-new" onclick="newSession()">+ ເປີດໃບໃໝ່</button>
+        <div id="storageWarn" class="ov-warn" style="display: none">
+          ເບຣົາເຊີນີ້ບັນທຶກອັດຕະໂນມັດບໍ່ໄດ້ — ເປີດໄຟລ໌ນີ້ໂດຍກົງໃນເບຣົາເຊີ
+          ເພື່ອໃຫ້ການບັນທຶກ ແລະ ປະຫວັດເຮັດວຽກ
+        </div>
+        <div class="ov-hist-title">ປະຫວັດໃບໂພຍ</div>
+        <div id="histList"></div>
+        <div class="ver" id="verLine"></div>
+      </div>
+    </div>
+
+    <div class="topbar">
+      <div class="topbar-in">
+        <h1 class="brand">ຄິດໄລ່ໂພຍ</h1>
+        <button
+          class="sess"
+          id="sessBadge"
+          onclick="renameSession()"
+          title="ແຕະເພື່ອປ່ຽນຊື່ໃບ"
+        >
+          —
+        </button>
+        <span class="exp-pill" id="expPill" style="display: none"></span>
+        <div class="top-tot">
+          <div class="t">
+            <div class="k">ລວມກີບ</div>
+            <div class="v"><span id="tLak">0</span> ₭</div>
+          </div>
+          <div class="t">
+            <div class="k">ລວມບາດ</div>
+            <div class="v"><span id="tThb">0</span> ฿</div>
+          </div>
+        </div>
+        <button
+          class="topbtn install"
+          id="installBtn"
+          onclick="doInstall()"
+          style="display: none"
+        >
+          ⤓ ຕິດຕັ້ງແອັບ
+        </button>
+        <button class="topbtn" onclick="showOverlay()">ປະຫວັດ / ໃບໃໝ່</button>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="grid">
+        <div class="col-main">
+          <!-- ໃສ່ໂພຍ -->
+          <div class="card entry">
+            <div class="card-h">
+              ໃສ່ໂພຍ
+              <span class="hint"
+                >Enter = ເພີ່ມ (ຂຶ້ນເທິງສຸດ) · Shift+Enter = ຂຶ້ນແຖວໃໝ່ ·
+                ວາງທັງກ້ອນ = ຮຽງຕາມໂພຍ</span
+              >
+            </div>
+            <div class="entry-box">
+              <textarea
+                id="entryIn"
+                rows="1"
+                placeholder="ພິມເລກເທື່ອລະແຖວ ຫຼື ວາງໂພຍທັງກ້ອນກໍ່ໄດ້   ເຊັ່ນ  14=10x10   ຫຼື   11-51-91=20"
+                autofocus
+              ></textarea>
+              <div class="entry-bar">
+                <div class="curtoggle">
+                  <button id="curLak" class="on lak" onclick="setCur('LAK')">
+                    ₭ ກີບ
+                  </button>
+                  <button id="curThb" class="thb" onclick="setCur('THB')">
+                    ฿ ບາດ
+                  </button>
+                </div>
+                <span class="preview" id="preview">—</span>
+                <button class="btn primary" onclick="submitEntry()">
+                  ເພີ່ມເຂົ້າລາຍການ
+                </button>
+              </div>
+              <div class="pv-wrap" id="pvWrap" style="display: none"></div>
+            </div>
+
+            <details class="rules">
+              <summary>ກົດການອ່ານເລກ</summary>
+              <div class="rules-body">
+                <div class="rule">
+                  <code>14=10x10</code> — ບົນ 10 ລຸ່ມ 10<br />ຍອດ
+                  <span class="res">20</span>
+                </div>
+                <div class="rule">
+                  ໝາຍ <code>x</code> ຫຼື <code>*</code> = ແຍກ ບົນ/ລຸ່ມ<br />
+                  <code>32x10</code> → ບົນ 10 ລຸ່ມ 10 ຍອດ
+                  <span class="res">20</span>
+                </div>
+                <div class="rule">
+                  <code>11-51-91=20</code> — 3 ຕົວ ຕົວລະ 20<br />ຍອດ
+                  <span class="res">60</span>
+                </div>
+                <div class="rule">
+                  <code>507-547-587=30</code> — 3 ຕົວ ຕົວລະ 30<br />ຍອດ
+                  <span class="res">90</span>
+                </div>
+                <div class="rule">
+                  <code>28.49.11=21ບລ</code> — ບລ = ບົນ ແລະ ລຸ່ມ ລາຄາເທົ່າກັນ<br />3
+                  ຕົວ × (21+21) ຍອດ <span class="res">126</span>
+                </div>
+                <div class="rule">
+                  <code>49=</code> ຫຼື <code>199</code> (ບໍ່ຂຽນລາຄາ) →
+                  ໃຊ້ລາຄາຂອງແຖວກ່ອນໜ້າ
+                </div>
+                <div class="rule">
+                  ຂຽນເລກຫຼາຍແຖວ ແລ້ວປິດທ້າຍດ້ວຍ <code>ໂຕລະ20</code> ຫຼື
+                  <code>ປ່ອງ20</code> → ທຸກແຖວຂ້າງເທິງ ຕົວລະ 20<br />
+                  ຂຽນ <code>ໂຕລະ25ພັນ</code> ກໍ່ໄດ້ — ຄຳ ພັນ/ໝື່ນ/ແສນ
+                  ຈະບໍ່ຖືກນັບເປັນຕົວເລກ
+                </div>
+                <div class="rule">
+                  <code>23-20</code> — 2 ຈຳນວນ ບໍ່ມີ = → ເລກ 23 ລາຄາ 20
+                </div>
+                <div class="rule">
+                  <code>07</code> <code>47</code> <code>87=5</code> —
+                  ລາຄາຢູ່ແຖວລຸ່ມ ກໍ່ອ່ານໄດ້ (07, 47 ໄດ້ 5 ນຳ)
+                </div>
+                <div class="rule">
+                  <code>ລວມ21.000</code> ຫຼື <code>20,000ຢຸ້ຍ</code> —
+                  ຈຸດ/ຈຸດຕັດຫຼັກພັນ ອ່ານໄດ້ ແລະ ຖ້າຂຽນລາຄາເປັນພັນ
+                  ຈະຖືວ່າກົງກັນ
+                </div>
+                <div class="rule">
+                  <code>39-79ໂຕ30*30</code> — ຂຽນ <code>ໂຕ</code> ຕິດກັບເລກ
+                  ກໍ່ໄດ້<br />2 ຕົວ × (30+30) ຍອດ <span class="res">120</span>
+                </div>
+                <div class="rule">
+                  <code>ລ່າງ+ບົນ</code> <code>ບົນ+ລ່າງ</code> <code>ບລ</code> =
+                  ທັງສອງ · <code>16.56.96=10ລ່າງ</code> = ລຸ່ມຢ່າງດຽວ
+                </div>
+                <div class="rule">
+                  <code>01_1</code> — ຂີດລຸ່ມ <code>_</code> ໃຊ້ຂັ້ນໄດ້
+                  ຄືກັບ <code>-</code> · <code>71.</code> ມີຈຸດຕໍ່ທ້າຍກໍ່ອ່ານໄດ້
+                </div>
+                <div class="rule">
+                  <code>—-60.000ນ້ອຍ</code> — ຂີດນຳໜ້າ ແລະ ຄຳວ່າ ກີບ/ບາດ
+                  ຈະຖືກຕັດອອກ ເຫຼືອຊື່ ນ້ອຍ + ຍອດ 60,000
+                </div>
+                <div class="rule">
+                  <code>…=5ພັນ. 101-…=2ພັນ</code> — 2 ລາຍການໃນແຖວດຽວ
+                  ກໍ່ແຍກໃຫ້
+                </div>
+                <div class="rule">
+                  <code>22.62=5ອ້າຍລອງ</code> — ຊື່ຕໍ່ທ້າຍ = ຊື່ຂອງຊຸດນັ້ນ
+                </div>
+                <div class="rule">
+                  1 ຂໍ້ຄວາມແຊັດ = 1 ຊຸດ · ເກັບເວລາ ແລະ ຜູ້ສົ່ງໄວ້ໃຫ້ນຳ
+                </div>
+                <div class="rule">
+                  ຫົວຂໍ້ມີຄຳວ່າ <code>ໄທ</code> (ເຊັ່ນ 16/ໄທ) →
+                  ນັບເປັນ ບາດ ฿ ຈົນຈົບຂໍ້ຄວາມນັ້ນ
+                </div>
+                <div class="rule">
+                  ຍອດລວມມີ <code>฿</code> ຫຼື ຄຳວ່າ ບາດ →
+                  ຊຸດນັ້ນທັງໝົດປ່ຽນເປັນ ບາດ
+                </div>
+                <div class="rule">
+                  ວາງຈາກແຊັດໄດ້ເລີຍ — ຫົວແບບ
+                  <code>[10:37 PM] ຊື່:</code> ຈະຖືກຕັດອອກໃຫ້ອັດຕະໂນມັດ
+                  ແລະ ນັບເປັນກ້ອນໃໝ່
+                </div>
+                <div class="rule">
+                  <code>228/268/28/68=5</code> — ຂັ້ນດ້ວຍ <code>/</code>
+                  <code>-</code> <code>.</code> ກໍ່ໄດ້<br />4 ຕົວ ຍອດ
+                  <span class="res">20</span>
+                </div>
+                <div class="rule">
+                  ໝາຍ <code>:</code> ໃຊ້ແທນ <code>=</code> ໄດ້ —
+                  <code>11:2x2</code> = <code>11=2x2</code>
+                </div>
+                <div class="rule">
+                  ແຖວທີ່ມີ <code>ລວມ</code> ຫຼື ຊື່ລູກຄ້າ+ຍອດ →
+                  ໃຊ້ກວດຍອດຕາມບິນ
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- ລາຍການ -->
+          <div class="card">
+            <div class="toolbar">
+              <span class="card-h" style="margin: 0">
+                ລາຍການ <span class="hint" id="rowsHint">0 ແຖວ</span>
+              </span>
+              <button class="btn mini" onclick="addRow()">+ ເພີ່ມແຖວເປົ່າ</button>
+              <button class="btn mini" onclick="exportExcel()">
+                ດາວໂຫຼດ Excel
+              </button>
+              <button class="btn mini" onclick="loadSample()">ໃສ່ຕົວຢ່າງ</button>
+              <button
+                class="btn mini ghost"
+                onclick="clearAll()"
+                style="margin-left: auto"
+              >
+                ລຶບທັງໝົດ
+              </button>
+            </div>
+            <div id="tableWrap">
+              <div class="empty" id="emptyMsg">
+                <span class="big">▤</span>
+                ຍັງບໍ່ມີລາຍການ<br />
+                ພິມເລກໃສ່ຊ່ອງດ້ານເທິງ ແລ້ວກົດ Enter
+              </div>
+              <table id="tbl" style="display: none">
+                <colgroup>
+                  <col class="c-nums" />
+                  <col class="c-cnt" />
+                  <col class="c-amt" />
+                  <col class="c-amt" />
+                  <col class="c-tot" />
+                  <col class="c-cur" />
+                  <col class="c-del" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>ເລກ</th>
+                    <th class="mid">ຕົວ</th>
+                    <th class="mid top-h">ບົນ</th>
+                    <th class="mid bottom-h">ລຸ່ມ</th>
+                    <th style="text-align: right">ຍອດ</th>
+                    <th class="mid">ສະກຸນ</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+              </table>
+            </div>
+            <div id="notesBox" style="display: none">
+              <div class="notes-label">ແຖວທີ່ຂ້າມ (ຫົວຂໍ້ / ຊື່)</div>
+              <div class="notes" id="notes"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-side">
+          <div class="card sumcard">
+            <div class="sum-block">
+              <div class="sum-head">
+                <span class="badge lak">₭ ກີບ</span>
+                <span class="sum-cnt" id="lakCount">0 ຕົວ</span>
+              </div>
+              <div class="sum-line">
+                <span class="k" style="color: var(--top)">ບົນ</span>
+                <span class="v" style="color: var(--top)" id="lakTop">0</span>
+              </div>
+              <div class="sum-line">
+                <span class="k" style="color: var(--bottom)">ລຸ່ມ</span>
+                <span class="v" style="color: var(--bottom)" id="lakBottom">0</span>
+              </div>
+              <div class="grand">
+                <span class="g-k">ລວມກີບ</span>
+                <span class="g-v"><span id="lakGrand">0</span> ₭</span>
+              </div>
+            </div>
+            <div class="sum-block">
+              <div class="sum-head">
+                <span class="badge thb">฿ ບາດ</span>
+                <span class="sum-cnt" id="thbCount">0 ຕົວ</span>
+              </div>
+              <div class="sum-line">
+                <span class="k" style="color: var(--top)">ບົນ</span>
+                <span class="v" style="color: var(--top)" id="thbTop">0</span>
+              </div>
+              <div class="sum-line">
+                <span class="k" style="color: var(--bottom)">ລຸ່ມ</span>
+                <span class="v" style="color: var(--bottom)" id="thbBottom">0</span>
+              </div>
+              <div class="grand thb-g">
+                <span class="g-k">ລວມບາດ</span>
+                <span class="g-v"><span id="thbGrand">0</span> ฿</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h">ກວດຍອດຕາມບິນ</div>
+            <div id="bills">
+              <div class="empty" style="padding: 18px">— ຍັງບໍ່ມີ —</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="boot" id="boot">
+      <div>
+        <img src="./assets/android-chrome-192x192.png" alt="" />
+        <div class="bt">ຄິດໄລ່ໂພຍ</div>
+        <div class="bs" id="bootMsg">ກຳລັງກວດເວີຊັນລ່າສຸດ…</div>
+        <div class="spin"></div>
+      </div>
+    </div>
+
+    <div class="lic" id="updModal" style="z-index: 300">
+      <div class="lic-card">
+        <div style="font-size: 46px; line-height: 1">⬆</div>
+        <h1 class="lic-title" style="margin-top: 8px">ມີເວີຊັນໃໝ່</h1>
+        <div class="lic-sub" id="updSub">
+          ກະລຸນາອັບເດດກ່ອນໃຊ້ງານ<br />ຂໍ້ມູນໂພຍຂອງທ່ານຈະບໍ່ຫາຍ
+        </div>
+        <button class="lic-btn" id="updBtn" onclick="doUpdate()">
+          ອັບເດດດຽວນີ້
+        </button>
+        <div class="ver" id="updVer"></div>
+      </div>
+    </div>
+
+    <div class="mobbar">
+      <div>
+        <div class="k">ລວມກີບ</div>
+        <div class="v"><span id="mLak">0</span> ₭</div>
+      </div>
+      <div>
+        <div class="k">ລວມບາດ</div>
+        <div class="v"><span id="mThb">0</span> ฿</div>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+      let rows = [];
+      let segMeta = {}; // ຂໍ້ມູນແຕ່ລະຊຸດ: {time, sender, name, stated, cur}
+      let notes = [];
+      let segCounter = 0;
+      let currentId = null,
+        currentName = "";
+      let curCur = "LAK";
+      let prevBet = null; // ແຖວລ່າສຸດທີ່ເພີ່ມ — ໃຊ້ຕອນ "49=" ບໍ່ຂຽນລາຄາ
+      let firstNewIndex = -1; // ຕຳແໜ່ງແຖວທຳອິດທີ່ຫາກໍ່ເພີ່ມ
+
+      const LAO_THAI = /[\u0E00-\u0E7F\u0E80-\u0EFF]/;
+      const MUL = /[x*\u00d7\u2715\u2716]/i;
+      // ບລ, ບ,ລ, ບ-ລ, ບ/ລ (ພາສາໄທ บล) = ບົນ+ລຸ່ມ ລາຄາເທົ່າກັນ
+      const BL = /[ບบ]\s*[,\-\/.]?\s*[ລล]/;
+
+      function toNum(x) {
+        const n = parseFloat(String(x).replace(/[^\d.\-]/g, ""));
+        return isNaN(n) ? 0 : n;
+      }
+      /* ອ່ານຕົວເລກໃນແຖວ ໂດຍຮູ້ຈັກຈຸດຂັ້ນຫຼັກພັນ: "21.000" → 21000 */
+      function grabNums(str) {
+        const m = String(str).match(/\d[\d.,]*/g) || [];
+        return m.map((t) => {
+          t = t.replace(/[.,]+$/, "");
+          if (/^\d{1,3}([.,]\d{3})+$/.test(t))
+            return parseInt(t.replace(/[.,]/g, ""), 10);
+          return toNum(t);
+        });
+      }
+      /* ຍອດຄິດໄລ່ ກັບ ຍອດທີ່ຂຽນ ອາດຕ່າງກັນ 1000 ເທົ່າ
+         (ຄົນຂຽນລາຄາເປັນ "ພັນ" ແຕ່ຂຽນຍອດລວມເປັນກີບເຕັມ) */
+      function sameAmount(sum, stated) {
+        if (!stated) return false;
+        return (
+          sum === stated || sum * 1000 === stated || sum === stated * 1000
+        );
+      }
+      function countNums(s) {
+        return (
+          String(s)
+            .split(/[-,\s\/]+/)
+            .map((t) => t.trim())
+            .filter((t) => /^\d+$/.test(t)).length || 0
+        );
+      }
+      function fmt(n) {
+        if (isNaN(n)) n = 0;
+        return (Math.round(n * 100) / 100).toLocaleString("en-US");
+      }
+      function escapeHtml(s) {
+        return String(s).replace(
+          /[&<>]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c],
+        );
+      }
+      function escapeAttr(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;");
+      }
+      function curSym(c) {
+        return c === "THB" ? "฿" : "₭";
+      }
+      function curName(c) {
+        return c === "THB" ? "ບາດ" : "ກີບ";
+      }
+
+      /* ---------- ຕົວອ່ານແຖວ (ໃຊ້ຮ່ວມກັນທັງພິມແຖວດຽວ ແລະ ວາງທັງກ້ອນ) ---------- */
+      // ຄຳນຳໜ້າລາຄາທີ່ຂຽນຕິດກັບເລກ ເຊັ່ນ "39-79ໂຕ30*30"
+      const INLINE_PRICE =
+        /(?:ໂຕລະ|ຕົວລະ|ຫົວລະ|ໂຕ|ຕົວ|ປ່ອງ|ตัวละ|ตัว|ช่อง)\s*([\d.,]+)\s*(?:[x*\u00d7\u2715\u2716]\s*([\d.,]+))?/;
+      // ບົນ+ລ່າງ / ລ່າງ+ບົນ / ບລ  = ລາຄາເທົ່າກັນທັງສອງ
+      const BOTH_SIDE =
+        /(?:ບົນ|ບ|บน|บ)\s*[+＋]\s*(?:ລ່າງ|ລຸ່ມ|ລ|ล่าง|ล)|(?:ລ່າງ|ລຸ່ມ|ລ|ล่าง|ล)\s*[+＋]\s*(?:ບົນ|ບ|บน|บ)/;
+      const BOTTOM_ONLY = /ລ່າງ|ລຸ່ມ|ล่าง/;
+
+      function isBetLine(line) {
+        const hasSep = /[=:]/.test(line);
+        const hasMul = MUL.test(line);
+        return (
+          /^\d/.test(line) &&
+          (hasSep ||
+            hasMul ||
+            /^\d+\s*[-._\/]\s*\d/.test(line) ||
+            INLINE_PRICE.test(line))
+        );
+      }
+
+      /* ບາງແຖວມີຫຼາຍລາຍການ ເຊັ່ນ
+         "01-41-81=5ພັນ. 101-141-181=2ພັນ"  → ຕັດອອກເປັນ 2 ລາຍການ */
+      function splitBets(line) {
+        const txt = String(line);
+        const re = /\s*[.,]?\s+(?=\d)/g;
+        const chunks = [];
+        let start = 0,
+          m;
+        while ((m = re.exec(txt))) {
+          const left = txt.slice(start, m.index);
+          if (
+            /=/.test(left) ||
+            /(?:ໂຕລະ|ຕົວລະ|ໂຕ|ຕົວ|ປ່ອງ)\s*\d/.test(left)
+          ) {
+            chunks.push(left);
+            start = re.lastIndex;
+          }
+        }
+        chunks.push(txt.slice(start));
+        return chunks.map((c) => c.trim()).filter(Boolean);
+      }
+
+      function parseBet(line) {
+        line = String(line).trim();
+        if (!isBetLine(line)) return null;
+        let hint = null;
+        const hm = line.match(/(?:ເປັນ|เป็น)\s*(\d+)/);
+        if (hm) hint = toNum(hm[1]);
+        let core = (line.match(
+          /^[0-9=:x*.,_\-\/\s\u00d7\u2715\u2716]+/i,
+        ) || [""])[0].trim();
+        core = core.replace(/:/g, "=");
+        const rest = line.slice(
+          (line.match(/^[0-9=:x*.,_\-\/\s\u00d7\u2715\u2716]+/i) || [""])[0]
+            .length,
+        );
+
+        let nums = "",
+          top = 0,
+          bottom = 0,
+          inherit = false;
+
+        // (ກ) ລາຄາຂຽນຕິດຫຼັງເລກ ເຊັ່ນ "ໂຕ30*30" / "ໂຕ10ພັນ"
+        const ip = rest.match(INLINE_PRICE) || core.match(INLINE_PRICE);
+        if (ip) {
+          nums = core
+            .replace(/=/g, " ")
+            .split(/[-,._\/\s]+/)
+            .filter((t) => /^\d+$/.test(t))
+            .join("-");
+          top = grabNums(ip[1])[0] || 0;
+          bottom = ip[2] ? grabNums(ip[2])[0] || 0 : 0;
+        } else if (core.includes("=")) {
+          const parts = core.split("=");
+          const left = parts[0];
+          const right = parts.slice(1).join("=");
+          nums = left.split(/[-,._\/\s]+/).filter(Boolean).join("-");
+          if (!right.replace(/[^\d]/g, "")) {
+            inherit = true;
+          } else if (MUL.test(right)) {
+            const ab = right.split(MUL).filter((x) => x.trim() !== "");
+            top = toNum(ab[0]);
+            bottom = ab.length > 1 ? toNum(ab[1]) : toNum(ab[0]);
+          } else {
+            top = toNum(right);
+            bottom = 0;
+          }
+        } else if (MUL.test(core)) {
+          const parts = core.split(MUL).filter((x) => x.trim() !== "");
+          nums = parts[0].split(/[-,._\/\s]+/).filter(Boolean).join("-");
+          top = parts.length > 1 ? toNum(parts[1]) : 0;
+          bottom = parts.length > 2 ? toNum(parts[2]) : top;
+        } else {
+          const parts = core.split(/[-,._\/\s]+/).filter(Boolean);
+          if (parts.length === 2) {
+            nums = parts[0];
+            top = toNum(parts[1]);
+            bottom = 0;
+          } else {
+            nums = parts.join("-");
+            top = 0;
+            bottom = 0;
+          }
+        }
+
+        // (ຂ) ຄຳກຳກັບ ບົນ / ລ່າງ
+        if (BOTH_SIDE.test(line) || BL.test(rest)) {
+          if (!bottom) bottom = top;
+        } else if (BOTTOM_ONLY.test(rest) && top && !bottom) {
+          bottom = top;
+          top = 0;
+        }
+        return { nums, top, bottom, hint, inherit };
+      }
+
+      function rowTotal(r) {
+        return (toNum(r.top) + toNum(r.bottom)) * (countNums(r.nums) || 1);
+      }
+
+      /* ---------- ຕັດຫົວຂໍ້ຄວາມແຊັດ (WhatsApp / Messenger) ອອກ ----------
+         ເຊັ່ນ  "[10:37 PM, 7/16/2026] Sone Tv: 11:2x2"  →  "11:2x2" */
+      /* ເບີໂທ: ຕ້ອງຂຶ້ນຕົ້ນດ້ວຍ + ຫຼື ມີຊ່ອງວ່າງ ແລະ ຍາວພໍສົມຄວນ
+         → ກັນບໍ່ໃຫ້ໄປຕັດເລກໂພຍ ເຊັ່ນ 11:2x2 ຫຼື 507-547-587:30 */
+      function isPhoneName(name) {
+        const n = String(name).trim();
+        if (!/^\+?\d[\d\s().-]{7,}$/.test(n)) return false;
+        return /^\+/.test(n) || /\s/.test(n);
+      }
+      function isPersonName(name, rest) {
+        return !/\d/.test(name) && isBetLine(String(rest).trim());
+      }
+      function stripChat(line) {
+        let s = String(line).trim();
+        let hadPrefix = false;
+        let time = "";
+        let sender = "";
+        const before = s;
+        const br = s.match(/^\[([^\]]{1,60})\]\s*/);
+        if (br) {
+          time = br[1].trim();
+          s = s.slice(br[0].length);
+        }
+        const dash = s.match(
+          /^(\d{1,2}[\/.]\d{1,2}[\/.]\d{2,4},?\s*\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s*[-–—]\s*/i,
+        );
+        if (dash) {
+          time = time || dash[1].trim();
+          s = s.slice(dash[0].length);
+        }
+        const t2 = s.match(/^(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)\s*[-–—]\s*/i);
+        if (t2) {
+          time = time || t2[1].trim();
+          s = s.slice(t2[0].length);
+        }
+        if (s !== before) hadPrefix = true;
+        // ຊື່ຜູ້ສົ່ງ ອາດເປັນເບີໂທ (+856 20 55 519 256:) ຫຼື ຊື່ຄົນ
+        const m = s.match(/^([^:\n]{1,40}):\s*(.+)$/);
+        if (m && (hadPrefix || isPhoneName(m[1]) || isPersonName(m[1], m[2]))) {
+          sender = m[1].trim();
+          s = m[2].trim();
+        } else if (hadPrefix) {
+          const only = s.match(/^([^:\n]{1,40}):\s*$/);
+          if (only) {
+            sender = only[1].trim();
+            s = "";
+          }
+        }
+        // ຂີດນຳໜ້າແຖວ ເຊັ່ນ "—-60.000ນ້ອຍ" → ຕັດອອກ
+        s = s.replace(
+          /^[\u2014\u2013\u2012\u2015\-_=]+\s*(?=[\d\u0E80-\u0EFF\u0E00-\u0E7F])/,
+          "",
+        );
+        return { t: s.trim(), newMsg: hadPrefix, time, sender };
+      }
+      function cleanLine(line) {
+        return stripChat(line).t;
+      }
+
+      /* ---------- ອ່ານຂໍ້ຄວາມ (1 ແຖວ ຫຼື ຫຼາຍແຖວ) ----------
+         ຫຼັກການ: 1 ຂໍ້ຄວາມແຊັດ = 1 ຊຸດ (set/bill)
+         ແຖວທີ່ຍັງບໍ່ມີລາຄາ ຈະລໍຖ້າແຖວ "ໂຕລະ20 / ປ່ອງ20" ຫຼື ເອົາລາຄາແຖວກ່ອນໜ້າ */
+      const PRICE_WORD = /^(ໂຕລະ|ຕົວລະ|ໂຕ|ຕົວ|ປ່ອງ|ຫົວລະ|ตัวละ|ตัว|ช่อง|ต่อตัว)$/;
+      // ຄຳໜ່ວຍທີ່ຄົນຂຽນຕໍ່ທ້າຍລາຄາ ເຊັ່ນ "ໂຕລະ25ພັນ" → ຖືເປັນ 25
+      const UNIT_WORD = /(ພັນ|ໝື່ນ|ຫມື່ນ|ແສນ|ລ້ານ|พัน|หมื่น|แสน|ล้าน|k)\s*$/i;
+      function segSet(seg, patch) {
+        segMeta[seg] = Object.assign({}, segMeta[seg] || {}, patch);
+      }
+      function segName(seg, name) {
+        if (!name) return;
+        const m = segMeta[seg] || {};
+        if (!m.name) segSet(seg, { name });
+      }
+
+      function processText(text) {
+        const raw = String(text)
+          .split(/\r?\n/)
+          .map((l) => stripChat(l));
+        // ແຖວຫົວຂໍ້ຄວາມທີ່ບໍ່ມີເນື້ອຫາ ("[6:07 PM] Koud:") →
+        // ຍົກເວລາ/ຜູ້ສົ່ງໄປໃສ່ແຖວທຳອິດຂອງຂໍ້ຄວາມນັ້ນ
+        const real = [];
+        let carry = null;
+        raw.forEach((o) => {
+          if (!o.t) {
+            if (o.newMsg) carry = o;
+            return;
+          }
+          if (carry) {
+            if (!o.newMsg) {
+              o.newMsg = true;
+              o.time = carry.time;
+              o.sender = carry.sender;
+            }
+            carry = null;
+          }
+          const chunks = splitBets(o.t);
+          chunks.forEach((c, ci) => {
+            real.push({
+              t: c,
+              newMsg: ci === 0 ? o.newMsg : false,
+              time: o.time,
+              sender: o.sender,
+            });
+          });
+        });
+        if (!real.length) return 0;
+        const single = real.length === 1; // ພິມເອງແຖວດຽວ → ເອົາຂຶ້ນເທິງສຸດ
+        const startLen = rows.length;
+        let headerCur = curCur; // ສະກຸນຈາກຫົວຂໍ້ (ໄທ/ລາວ)
+        let lineCur = curCur;
+        let added = 0;
+        let pending = []; // ແຖວທີ່ຍັງບໍ່ມີລາຄາ
+
+        // ແຖວທີ່ຍັງບໍ່ມີລາຄາ → ເອົາລາຄາຂອງແຖວກ່ອນໜ້າໃນຊຸດດຽວກັນ
+        function flushPending() {
+          pending.forEach((r) => {
+            const idx = rows.indexOf(r);
+            const priced = (k) =>
+              rows[k].seg === r.seg &&
+              (toNum(rows[k].top) || toNum(rows[k].bottom));
+            let src = null;
+            // ຮູບແບບ "07 / 47 / 87=5" → ລາຄາຢູ່ແຖວລຸ່ມ ຫາລົງກ່ອນ
+            for (let k = idx + 1; k < rows.length; k++)
+              if (rows[k].seg === r.seg) {
+                if (priced(k)) {
+                  src = rows[k];
+                  break;
+                }
+              } else break;
+            // ຮູບແບບ "099=10 / 199" → ລາຄາຢູ່ແຖວເທິງ
+            if (!src)
+              for (let k = idx - 1; k >= 0; k--)
+                if (rows[k].seg === r.seg) {
+                  if (priced(k)) {
+                    src = rows[k];
+                    break;
+                  }
+                } else break;
+            if (!src && prevBet && prevBet.seg === r.seg) src = prevBet;
+            if (src) {
+              r.top = toNum(src.top);
+              r.bottom = toNum(src.bottom);
+            }
+          });
+          pending = [];
+        }
+
+        for (const o of real) {
+          const line = o.t;
+
+          // ---- ຂໍ້ຄວາມແຊັດອັນໃໝ່ = ຊຸດໃໝ່ ----
+          if (o.newMsg) {
+            flushPending();
+            if (rows.some((r) => r.seg === segCounter)) segCounter++;
+            headerCur = lineCur = curCur;
+            if (o.time || o.sender)
+              segSet(segCounter, { time: o.time, sender: o.sender });
+          }
+
+          // ---- ພິມຍອດເປົ່າໆ ເຊັ່ນ 250 (ສະເພາະຕອນພິມແຖວດຽວ) ----
+          if (single && /^\d+(\.\d+)?$/.test(line)) {
+            rows.push({
+              nums: "",
+              top: toNum(line),
+              bottom: 0,
+              seg: segCounter,
+              hint: null,
+              cur: lineCur,
+            });
+            added++;
+            continue;
+          }
+
+          // ---- ເລກໂດດ ບໍ່ມີລາຄາ ເຊັ່ນ 09 / 199 ----
+          if (!single && /^\d{1,6}\s*[.\-_,]*\s*$/.test(line)) {
+            const r = {
+              nums: line.replace(/[^\d]/g, ""),
+              top: 0,
+              bottom: 0,
+              seg: segCounter,
+              hint: null,
+              cur: lineCur,
+            };
+            rows.push(r);
+            pending.push(r);
+            added++;
+            continue;
+          }
+
+          const bet0 = isBetLine(line);
+
+          // ---- ແຖວທີ່ມີຄຳ + ຕົວເລກ ----
+          // ຕົວເລກນຳໜ້າ ແລ້ວຕໍ່ດ້ວຍຕົວໜັງສືລາວທັນທີ ເຊັ່ນ "20,000ຢຸ້ຍ"
+          // (ບໍ່ນັບ "16/ໄທ" ເພາະມີ / ຂັ້ນກາງ)
+          const leadNum =
+            /^[\d.,]+\s*([\u0E80-\u0EFF\u0E00-\u0E7F].*)$/.exec(line);
+          // ຕົວເລກຂັ້ນຫຼັກພັນນຳໜ້າ ເຊັ່ນ "60.000ນ້ອຍ" / "20.000ກີບ" = ຍອດລວມ
+          const groupedTotal = /^\d{1,3}(?:[.,]\d{3})+\s*[^\d]*$/.test(line);
+          const wordNum =
+            /ລວມ|รวม/.test(line) ||
+            groupedTotal ||
+            (LAO_THAI.test(line) &&
+              /\d/.test(line) &&
+              (/[\d\u0e3f]\s*$/.test(line) ||
+                UNIT_WORD.test(line) ||
+                (leadNum && LAO_THAI.test(leadNum[1]))) &&
+              !bet0);
+          if (wordNum) {
+            const isLuam = /ລວມ|รวม/.test(line);
+            let word =
+              leadNum && LAO_THAI.test(leadNum[1])
+                ? leadNum[1]
+                : line
+                    .replace(UNIT_WORD, "")
+                    .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭|THB|LAK)\s*$/i, "")
+                    .replace(/[\d\u0e3f\s.x*\u00d7]+$/, "")
+                    .replace(/[=:]\s*$/, "");
+            word = word
+              .replace(UNIT_WORD, "")
+              .replace(/(ບາດ|บาท|ກີບ|กีบ|฿|₭|ກີບ)/gi, "")
+              .replace(/^[\s\-_.,=]+|[\s\-_.,=]+$/g, "")
+              .trim();
+
+            // (ກ) ຍັງມີແຖວທີ່ບໍ່ມີລາຄາ ແລະ ບໍ່ແມ່ນຄຳວ່າ "ລວມ" → ນີ້ຄືລາຄາຕໍ່ຕົວ
+            const startsWord = /^[\u0E80-\u0EFF\u0E00-\u0E7F]/.test(line);
+            if (pending.length && !isLuam && startsWord) {
+              const mm = line.match(/(\d+)\s*[x*\u00d7]\s*(\d+)\s*$/);
+              let top = 0,
+                bottom = 0;
+              if (mm) {
+                top = toNum(mm[1]);
+                bottom = toNum(mm[2]);
+              } else {
+                const nn = grabNums(line);
+                top = nn.length ? nn[nn.length - 1] : 0;
+              }
+              pending.forEach((r) => {
+                r.top = top;
+                r.bottom = bottom;
+              });
+              pending = [];
+              if (word && !PRICE_WORD.test(word)) segName(segCounter, word);
+              continue;
+            }
+
+            // (ຂ) ຍອດສະຫຼຸບ / ຊື່ລູກຄ້າ + ຍອດ
+            flushPending();
+            const allNums = grabNums(line);
+            const stated = allNums.length ? allNums[allNums.length - 1] : 0;
+            if (/\u0e3f|ບາດ|บาท|thb/i.test(line)) lineCur = "THB";
+            else if (/₭|ກີບ|กีบ|lak/i.test(line)) lineCur = "LAK";
+            const segNow = segCounter;
+            rows.forEach((r) => {
+              if (r.seg === segNow) r.cur = lineCur;
+            });
+            segSet(segNow, {
+              stated,
+              cur: lineCur,
+              name: (segMeta[segNow] && segMeta[segNow].name) || word || "",
+            });
+            lineCur = headerCur;
+            segCounter++;
+            if (segMeta[segNow] && (segMeta[segNow].time || segMeta[segNow].sender))
+              segSet(segCounter, {
+                time: segMeta[segNow].time,
+                sender: segMeta[segNow].sender,
+              });
+            continue;
+          }
+
+          // ---- ຫົວຂໍ້ / ປ້າຍ ເຊັ່ນ 16/ໄທ , ບ,ລ ----
+          if (!bet0) {
+            notes.push(line);
+            if (/ໄທ|ไทย|thai/i.test(line)) lineCur = headerCur = "THB";
+            else if (/ລາວ|ลาว|lao/i.test(line)) lineCur = headerCur = "LAK";
+            else if (
+              LAO_THAI.test(line) &&
+              !/\//.test(line) &&
+              !(BL.test(line) && line.trim().length <= 6)
+            )
+              segName(segCounter, line.trim());
+            continue;
+          }
+
+          // ---- ແຖວເລກປົກກະຕິ ----
+          const bet = parseBet(line);
+          if (!bet) {
+            notes.push(line);
+            continue;
+          }
+          // ຊື່ລູກຄ້າຕໍ່ທ້າຍ ເຊັ່ນ 22.62=5ອ້າຍລອງ
+          const tail = line
+            .replace(/^[0-9=:x*.,_\-\/\s\u00d7\u2715\u2716]+/i, "")
+            .replace(INLINE_PRICE, "")
+            .replace(UNIT_WORD, "")
+            .replace(/(ບົນ|ລ່າງ|ລຸ່ມ|บน|ล่าง)/g, "")
+            .replace(/(ບ\s*[,\-\/.]?\s*ລ|บ\s*[,\-\/.]?\s*ล)/g, "")
+            .replace(/^(ໂຕລະ|ຕົວລະ|ໂຕ|ຕົວ|ປ່ອງ)/, "")
+            .replace(/[+＋\-.,_\s\d]+/g, " ")
+            .replace(/(ເດິ້|ເດີ້|ເດີ|ນະ|ນໍ|ດ້ວຍ|ค่ะ|ครับ)/g, "")
+            .trim();
+          if (tail && LAO_THAI.test(tail) && !PRICE_WORD.test(tail))
+            segName(segCounter, tail);
+
+          if (bet.inherit) {
+            const prev = prevBet || rows[rows.length - 1];
+            if (prev) {
+              bet.top = toNum(prev.top);
+              bet.bottom = toNum(prev.bottom);
+            }
+          }
+          prevBet = {
+            nums: bet.nums,
+            top: bet.top,
+            bottom: bet.bottom,
+            seg: segCounter,
+            hint: bet.hint,
+            cur: lineCur,
+          };
+          rows.push(prevBet);
+          if (!bet.top && !bet.bottom) pending.push(prevBet);
+          added++;
+        }
+        flushPending();
+
+        // ທຸກກໍລະນີ ຕໍ່ທ້າຍ → ຮຽງ 1, 2, 3 ລົງລຸ່ມ ຕາມລຳດັບທີ່ໃສ່
+        firstNewIndex = rows.length > startLen ? startLen : -1;
+        return added;
+      }
+
+      /* ---------- ຊ່ອງໃສ່ໂພຍ ---------- */
+      const entry = document.getElementById("entryIn");
+      function autoGrow() {
+        entry.style.height = "auto";
+        entry.style.height = Math.min(entry.scrollHeight, 320) + "px";
+      }
+      function setCur(c) {
+        curCur = c;
+        document.getElementById("curLak").className =
+          "lak" + (c === "LAK" ? " on" : "");
+        document.getElementById("curThb").className =
+          "thb" + (c === "THB" ? " on" : "");
+        updatePreview();
+        entry.focus();
+      }
+      /* ອ່ານລອງ ໂດຍບໍ່ແຕະຂໍ້ມູນຈິງ */
+      function dryRun(text) {
+        const bRows = rows,
+          bMeta = segMeta,
+          bNotes = notes,
+          bSeg = segCounter,
+          bPrev = prevBet,
+          bFirst = firstNewIndex,
+          bCur = curCur;
+        rows = [];
+        segMeta = {};
+        notes = [];
+        segCounter = 0;
+        prevBet = null;
+        try {
+          processText(text);
+        } catch (e) {}
+        const out = { rows: rows, meta: segMeta };
+        rows = bRows;
+        segMeta = bMeta;
+        notes = bNotes;
+        segCounter = bSeg;
+        prevBet = bPrev;
+        firstNewIndex = bFirst;
+        curCur = bCur;
+        return out;
+      }
+      function renderPvCards(text) {
+        const wrap = document.getElementById("pvWrap");
+        const res = dryRun(text);
+        const segs = [];
+        res.rows.forEach((r) => {
+          if (segs.indexOf(r.seg) < 0) segs.push(r.seg);
+        });
+        if (!segs.length) {
+          wrap.style.display = "none";
+          wrap.innerHTML = "";
+          return 0;
+        }
+        wrap.style.display = "";
+        wrap.innerHTML = segs
+          .map(function (sg, i) {
+            const m = res.meta[sg] || {};
+            const gr = res.rows.filter((r) => r.seg === sg);
+            let sum = 0;
+            gr.forEach((r) => (sum += rowTotal(r)));
+            const sym = curSym((gr[0] && gr[0].cur) || m.cur || curCur);
+            const stated = toNum(m.stated);
+            const good = stated ? sameAmount(sum, stated) : true;
+            const okBad = stated
+              ? good
+                ? ' · <span class="chk ok">✓ ກົງ</span>'
+                : ' · <span class="chk bad">✗ ໂພຍຂຽນ ' + fmt(stated) + "</span>"
+              : "";
+            const show = gr.slice(0, 6);
+            let lines = show
+              .map(
+                (r) =>
+                  escapeHtml(r.nums) +
+                  " → " +
+                  (countNums(r.nums) || 1) +
+                  "ຕົວ × " +
+                  r.top +
+                  (r.bottom ? "+" + r.bottom : "") +
+                  " = " +
+                  fmt(rowTotal(r)),
+              )
+              .join("\n");
+            if (gr.length > show.length)
+              lines +=
+                '\n<span class="pv-more">… ອີກ ' +
+                (gr.length - show.length) +
+                " ແຖວ</span>";
+            const meta = [];
+            if (m.time) meta.push(escapeHtml(m.time));
+            if (m.sender) meta.push(escapeHtml(m.sender));
+            return (
+              '<div class="pv' +
+              (good ? "" : " warn") +
+              '"><div class="pv-h"><span class="pv-name">' +
+              escapeHtml(m.name || "ຊຸດ " + (i + 1)) +
+              '</span><span class="pv-sum">' +
+              fmt(sum) +
+              " " +
+              sym +
+              '</span></div><div class="pv-time">' +
+              (meta.length ? meta.join(" · ") : "ບໍ່ມີເວລາໃນຂໍ້ຄວາມ") +
+              " · " +
+              gr.length +
+              " ແຖວ" +
+              okBad +
+              '</div><div class="pv-lines">' +
+              lines +
+              "</div></div>"
+            );
+          })
+          .join("");
+        return segs.length;
+      }
+      function updatePreview() {
+        const el = document.getElementById("preview");
+        const wrap = document.getElementById("pvWrap");
+        const txt = entry.value.trim();
+        if (!txt) {
+          el.innerHTML = "—";
+          wrap.style.display = "none";
+          wrap.innerHTML = "";
+          return;
+        }
+        const lines = txt
+          .split(/\r?\n/)
+          .map((l) => cleanLine(l))
+          .filter(Boolean);
+        if (lines.length > 1) {
+          let n = 0;
+          lines.forEach((l) => {
+            if (isBetLine(l)) n++;
+          });
+          const nsets = renderPvCards(entry.value);
+          el.innerHTML =
+            lines.length +
+            " ແຖວ · ລາຍການ " +
+            n +
+            (nsets ? " · " + nsets + " ຊຸດ" : "");
+          return;
+        }
+        wrap.style.display = "none";
+        wrap.innerHTML = "";
+        const b = parseBet(lines[0]);
+        if (!b) {
+          if (/^\d+(\.\d+)?$/.test(lines[0]))
+            el.innerHTML =
+              "ຍອດ <b>" + fmt(toNum(lines[0])) + " " + curSym(curCur) + "</b>";
+          else el.innerHTML = "ຫົວຂໍ້ / ຂ້າມ";
+          return;
+        }
+        const c = countNums(b.nums) || 1;
+        if (b.inherit) {
+          const prev = rows[rows.length - 1];
+          if (prev) {
+            b.top = toNum(prev.top);
+            b.bottom = toNum(prev.bottom);
+          }
+        }
+        const tot = (b.top + b.bottom) * c;
+        el.innerHTML =
+          c +
+          " ຕົວ × (" +
+          b.top +
+          (b.bottom ? "+" + b.bottom : "") +
+          ") = <b>" +
+          fmt(tot) +
+          " " +
+          curSym(curCur) +
+          "</b>";
+      }
+      function stickOffset() {
+        const bar = document.querySelector(".topbar");
+        return bar ? bar.offsetHeight : 68;
+      }
+      function syncStick() {
+        document.documentElement.style.setProperty(
+          "--stick",
+          stickOffset() + "px",
+        );
+      }
+      window.addEventListener("resize", syncStick);
+      window.addEventListener("scroll", () => {
+        const card = document.querySelector(".entry");
+        if (!card) return;
+        const stuck = card.getBoundingClientRect().top <= stickOffset() + 1;
+        card.classList.toggle("stuck", stuck);
+      });
+      /* ເລື່ອນໜ້າຈໍໃຫ້ແຖວທີ່ຫາກໍ່ເພີ່ມ ບໍ່ຖືກຫົວຕາຕະລາງບັງ */
+      function revealRow(idx) {
+        const tb = document.getElementById("tbody");
+        const tr = tb.querySelector('tr[data-i="' + idx + '"]');
+        if (!tr) return;
+        const off = stickOffset() + 14;
+        const y = tr.getBoundingClientRect().top + window.scrollY - off;
+        const need =
+          tr.getBoundingClientRect().top < off ||
+          tr.getBoundingClientRect().bottom > window.innerHeight;
+        if (need)
+          window.scrollTo({
+            top: Math.max(0, y),
+            behavior: "smooth",
+          });
+      }
+      function submitEntry() {
+        const txt = entry.value;
+        if (txt.trim()) {
+          processText(txt);
+          const target = firstNewIndex;
+          if (target >= 0) flashRow = target;
+          entry.value = "";
+          autoGrow();
+          updatePreview();
+          renderAll();
+          saveState();
+          if (target >= 0)
+            requestAnimationFrame(() => {
+              syncStick();
+              revealRow(target);
+            });
+        }
+        entry.focus();
+      }
+      entry.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          submitEntry();
+        }
+      });
+      entry.addEventListener("input", () => {
+        autoGrow();
+        updatePreview();
+      });
+      entry.addEventListener("paste", () => setTimeout(autoGrow, 0));
+
+      /* ---------- ຕາຕະລາງ ---------- */
+      function renderAll() {
+        renderTable();
+        renderNotes();
+        renderSummary();
+        renderBills();
+      }
+      let flashRow = -1;
+      function renderTable() {
+        const tb = document.getElementById("tbody");
+        document.getElementById("rowsHint").textContent = rows.length + " ແຖວ";
+        tb.innerHTML = "";
+        if (!rows.length) {
+          document.getElementById("tbl").style.display = "none";
+          document.getElementById("emptyMsg").style.display = "block";
+          return;
+        }
+        document.getElementById("emptyMsg").style.display = "none";
+        document.getElementById("tbl").style.display = "table";
+
+        const order = rows.map((_, i) => i);
+
+        let lastSeg = null;
+        order.forEach((i, pos) => {
+          const r = rows[i];
+          const cnt = countNums(r.nums) || 1;
+          const tot = rowTotal(r);
+          const hintWarn =
+            r.hint != null && r.hint !== tot && r.hint !== r.top + r.bottom
+              ? '<div class="warn">⚠ ໃນໂພຍຂຽນ ' + r.hint + "</div>"
+              : "";
+          const tr = document.createElement("tr");
+          tr.setAttribute("data-i", i);
+          let cls = "";
+          if (pos > 0 && r.seg !== lastSeg) cls = "seg-start";
+          if (i === flashRow) cls += " flash";
+          if (cls) tr.className = cls.trim();
+          lastSeg = r.seg;
+          tr.innerHTML =
+            '<td><input class="f" value="' +
+            escapeAttr(r.nums) +
+            '" placeholder="—" oninput="upd(' +
+            i +
+            ",'nums',this.value)\">" +
+            hintWarn +
+            "</td>" +
+            '<td class="cnt">' +
+            cnt +
+            "</td>" +
+            '<td class="mid"><input class="f amt top-v" type="number" inputmode="numeric" value="' +
+            (r.top || "") +
+            '" placeholder="0" oninput="upd(' +
+            i +
+            ",'top',this.value)\"></td>" +
+            '<td class="mid"><input class="f amt bottom-v" type="number" inputmode="numeric" value="' +
+            (r.bottom || "") +
+            '" placeholder="0" oninput="upd(' +
+            i +
+            ",'bottom',this.value)\"></td>" +
+            '<td class="rowtot">' +
+            fmt(tot) +
+            "</td>" +
+            '<td class="mid"><button class="curtog ' +
+            (r.cur === "THB" ? "thb" : "lak") +
+            '" title="ສະຫຼັບ ກີບ/ບາດ" onclick="toggleCur(' +
+            i +
+            ')">' +
+            curSym(r.cur) +
+            "</button></td>" +
+            '<td class="mid"><button class="del" title="ລຶບ" onclick="delRow(' +
+            i +
+            ')">✕</button></td>';
+          tb.appendChild(tr);
+        });
+        flashRow = -1;
+      }
+      function upd(i, key, val) {
+        if (key === "nums") rows[i].nums = val;
+        else rows[i][key] = toNum(val);
+        const cnt = countNums(rows[i].nums) || 1;
+        const tr = document
+          .getElementById("tbody")
+          .querySelector('tr[data-i="' + i + '"]');
+        if (tr) {
+          tr.children[1].textContent = cnt;
+          tr.children[4].textContent = fmt(rowTotal(rows[i]));
+        }
+        renderSummary();
+        renderBills();
+        saveState();
+      }
+      function delRow(i) {
+        rows.splice(i, 1);
+        renderAll();
+        saveState();
+      }
+      function addRow() {
+        rows.push({
+          nums: "",
+          top: 0,
+          bottom: 0,
+          seg: segCounter,
+          hint: null,
+          cur: curCur,
+        });
+        renderAll();
+        saveState();
+      }
+      function toggleCur(i) {
+        rows[i].cur = rows[i].cur === "THB" ? "LAK" : "THB";
+        renderAll();
+        saveState();
+      }
+
+      /* ---------- ສະຫຼຸບ ---------- */
+      function renderSummary() {
+        const t = {
+          LAK: { c: 0, top: 0, bottom: 0 },
+          THB: { c: 0, top: 0, bottom: 0 },
+        };
+        rows.forEach((r) => {
+          const cur = r.cur === "THB" ? "THB" : "LAK";
+          const c = countNums(r.nums) || 1;
+          t[cur].c += c;
+          t[cur].top += toNum(r.top) * c;
+          t[cur].bottom += toNum(r.bottom) * c;
+        });
+        const set = (id, v) => {
+          const e = document.getElementById(id);
+          if (e) e.textContent = v;
+        };
+        set("lakCount", fmt(t.LAK.c) + " ຕົວ");
+        set("lakTop", fmt(t.LAK.top));
+        set("lakBottom", fmt(t.LAK.bottom));
+        set("lakGrand", fmt(t.LAK.top + t.LAK.bottom));
+        set("thbCount", fmt(t.THB.c) + " ຕົວ");
+        set("thbTop", fmt(t.THB.top));
+        set("thbBottom", fmt(t.THB.bottom));
+        set("thbGrand", fmt(t.THB.top + t.THB.bottom));
+        set("mLak", fmt(t.LAK.top + t.LAK.bottom));
+        set("mThb", fmt(t.THB.top + t.THB.bottom));
+        set("tLak", fmt(t.LAK.top + t.LAK.bottom));
+        set("tThb", fmt(t.THB.top + t.THB.bottom));
+      }
+
+      /* ---------- ບິນ ---------- */
+      function segList() {
+        const seen = [];
+        rows.forEach((r) => {
+          if (seen.indexOf(r.seg) < 0) seen.push(r.seg);
+        });
+        return seen;
+      }
+      function segTotal(seg) {
+        let sum = 0;
+        rows.forEach((r) => {
+          if (r.seg === seg) sum += rowTotal(r);
+        });
+        return sum;
+      }
+      function segTitle(seg, i) {
+        const m = segMeta[seg] || {};
+        return m.name || "ຊຸດ " + (i + 1);
+      }
+      function renderBills() {
+        const el = document.getElementById("bills");
+        const segs = segList();
+        if (!segs.length) {
+          el.innerHTML =
+            '<div class="empty" style="padding:16px">— ຍັງບໍ່ມີ —</div>';
+          return;
+        }
+        el.innerHTML = "";
+        segs.forEach((seg, i) => {
+          const m = segMeta[seg] || {};
+          const gr = rows.filter((r) => r.seg === seg);
+          const sum = segTotal(seg);
+          const sym = curSym((gr[0] && gr[0].cur) || m.cur || "LAK");
+          const stated = toNum(m.stated);
+          const div = document.createElement("div");
+          div.className = "bill";
+          let chip;
+          if (stated)
+            chip =
+              sameAmount(sum, stated)
+                ? '<span class="chip ok">' + fmt(sum) + " " + sym + " ✓</span>"
+                : '<span class="chip bad">' +
+                  fmt(sum) +
+                  " / ຂຽນ " +
+                  fmt(stated) +
+                  " " +
+                  sym +
+                  "</span>";
+          else
+            chip = '<span class="chip plain">' + fmt(sum) + " " + sym + "</span>";
+          const meta = [];
+          if (m.time) meta.push(escapeHtml(m.time));
+          if (m.sender) meta.push(escapeHtml(m.sender));
+          div.innerHTML =
+            '<div class="h"><span class="name">' +
+            escapeHtml(segTitle(seg, i)) +
+            "</span>" +
+            chip +
+            '</div><div class="detail">' +
+            gr.length +
+            " ລາຍການ" +
+            (meta.length ? " · " + meta.join(" · ") : "") +
+            "</div>";
+          el.appendChild(div);
+        });
+      }
+
+      function renderNotes() {
+        const box = document.getElementById("notesBox");
+        const el = document.getElementById("notes");
+        if (!notes.length) {
+          box.style.display = "none";
+          return;
+        }
+        box.style.display = "block";
+        el.textContent = notes.join("\n");
+      }
+
+      function clearAll() {
+        if (rows.length && !confirm("ລຶບລາຍການທັງໝົດໃນໃບນີ້ບໍ?")) return;
+        entry.value = "";
+        autoGrow();
+        updatePreview();
+        rows = [];
+        segMeta = {};
+        notes = [];
+        segCounter = 0;
+        prevBet = null;
+        renderAll();
+        saveState();
+        entry.focus();
+      }
+
+      function loadSample() {
+        entry.value = `16/ໄທ
+14=10x10
+51=10x10
+41=10x10
+32=10
+72=10
+ເອື້ອຍໂສ 20
+09-3
+49-3
+89-3
+11-51-91=20
+507-547-587=30
+ນໍ້າ 15
+07=10
+47=10
+87=10
+ລວມ 50`;
+        autoGrow();
+        updatePreview();
+        submitEntry();
+      }
+
+      /* ---------- Excel ---------- */
+      /* ---------- ຂໍ້ມູນສຳລັບ Excel 3 ຊີດ ---------- */
+      function sheetDetail() {
+        const segs = segList();
+        const nameOf = {};
+        segs.forEach((sg, i) => (nameOf[sg] = segTitle(sg, i)));
+        const aoa = [];
+        aoa.push(["ຄິດໄລ່ໂພຍ — " + (currentName || "")]);
+        aoa.push(["ອອກເມື່ອ", new Date().toLocaleString("en-GB")]);
+        aoa.push([]);
+        aoa.push([
+          "ຊຸດ",
+          "ເວລາ",
+          "ເລກ",
+          "ຈຳນວນຕົວ",
+          "ບົນ",
+          "ລຸ່ມ",
+          "ຍອດລວມ",
+          "ສະກຸນ",
+        ]);
+        rows.forEach((r) => {
+          aoa.push([
+            nameOf[r.seg] || "—",
+            (segMeta[r.seg] && segMeta[r.seg].time) || "",
+            r.nums,
+            countNums(r.nums) || 1,
+            toNum(r.top),
+            toNum(r.bottom),
+            rowTotal(r),
+            curName(r.cur),
+          ]);
+        });
+        return aoa;
+      }
+      function sheetSets() {
+        const segs = segList();
+        const aoa = [];
+        aoa.push(["ສະຫຼຸບຕາມຊຸດ"]);
+        aoa.push([]);
+        aoa.push([
+          "ຊຸດ",
+          "ເວລາ",
+          "ຜູ້ສົ່ງ",
+          "ຈຳນວນລາຍການ",
+          "ຈຳນວນຕົວ",
+          "ຍອດລວມ",
+          "ສະກຸນ",
+          "ຍອດທີ່ຂຽນໃນໂພຍ",
+          "ສະຖານະ",
+        ]);
+        segs.forEach((sg, i) => {
+          const m = segMeta[sg] || {};
+          const gr = rows.filter((r) => r.seg === sg);
+          let cnt = 0;
+          gr.forEach((r) => (cnt += countNums(r.nums) || 1));
+          const sum = segTotal(sg);
+          const stated = toNum(m.stated);
+          aoa.push([
+            segTitle(sg, i),
+            m.time || "",
+            m.sender || "",
+            gr.length,
+            cnt,
+            sum,
+            curName((gr[0] && gr[0].cur) || m.cur || "LAK"),
+            stated || "",
+            stated ? (sameAmount(sum, stated) ? "ກົງກັນ" : "ບໍ່ກົງ") : "",
+          ]);
+        });
+        return aoa;
+      }
+      function sheetTotal() {
+        let lak = 0,
+          thb = 0,
+          top = 0,
+          bot = 0,
+          cnt = 0;
+        rows.forEach((r) => {
+          const c = countNums(r.nums) || 1;
+          cnt += c;
+          top += toNum(r.top) * c;
+          bot += toNum(r.bottom) * c;
+          if (r.cur === "THB") thb += rowTotal(r);
+          else lak += rowTotal(r);
+        });
+        const aoa = [];
+        aoa.push(["ຍອດລວມ — " + (currentName || "")]);
+        aoa.push(["ອອກເມື່ອ", new Date().toLocaleString("en-GB")]);
+        aoa.push([]);
+        aoa.push(["ລາຍການ", "ຈຳນວນ"]);
+        aoa.push(["ລວມກີບ (₭)", lak]);
+        aoa.push(["ລວມບາດ (฿)", thb]);
+        aoa.push([]);
+        aoa.push(["ຈຳນວນຊຸດ", segList().length]);
+        aoa.push(["ຈຳນວນແຖວ", rows.length]);
+        aoa.push(["ຈຳນວນຕົວ", cnt]);
+        aoa.push(["ລວມເງິນບົນ", top]);
+        aoa.push(["ລວມເງິນລຸ່ມ", bot]);
+        return aoa;
+      }
+      function buildAOA() {
+        // ໃຊ້ຕອນດາວໂຫຼດເປັນ CSV (ຮວມ 3 ສ່ວນໄວ້ໄຟລ໌ດຽວ)
+        return sheetDetail()
+          .concat([[]], sheetSets(), [[]], sheetTotal());
+      }
+      function loadXLSX() {
+        return new Promise((res) => {
+          if (window.XLSX) return res(true);
+          const s = document.createElement("script");
+          s.src =
+            "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+          s.onload = () => res(true);
+          s.onerror = () => res(false);
+          document.head.appendChild(s);
+        });
+      }
+      function fileStamp() {
+        const d = new Date(),
+          p = (n) => String(n).padStart(2, "0");
+        return (
+          d.getFullYear() +
+          p(d.getMonth() + 1) +
+          p(d.getDate()) +
+          "_" +
+          p(d.getHours()) +
+          p(d.getMinutes())
+        );
+      }
+      async function exportExcel() {
+        if (!rows.length) {
+          alert("ຍັງບໍ່ມີລາຍການໃຫ້ດາວໂຫຼດ");
+          return;
+        }
+        const ok = await loadXLSX();
+        if (ok && window.XLSX) {
+          const wb = XLSX.utils.book_new();
+
+          const ws1 = XLSX.utils.aoa_to_sheet(sheetDetail());
+          ws1["!cols"] = [
+            { wch: 18 },
+            { wch: 20 },
+            { wch: 24 },
+            { wch: 10 },
+            { wch: 8 },
+            { wch: 8 },
+            { wch: 12 },
+            { wch: 8 },
+          ];
+          XLSX.utils.book_append_sheet(wb, ws1, "ລາຍການ");
+
+          const ws2 = XLSX.utils.aoa_to_sheet(sheetSets());
+          ws2["!cols"] = [
+            { wch: 18 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 12 },
+            { wch: 10 },
+            { wch: 12 },
+            { wch: 8 },
+            { wch: 16 },
+            { wch: 10 },
+          ];
+          XLSX.utils.book_append_sheet(wb, ws2, "ຊຸດ");
+
+          const ws3 = XLSX.utils.aoa_to_sheet(sheetTotal());
+          ws3["!cols"] = [{ wch: 22 }, { wch: 16 }];
+          XLSX.utils.book_append_sheet(wb, ws3, "ຍອດລວມ");
+
+          XLSX.writeFile(wb, "poy_" + fileStamp() + ".xlsx");
+        } else {
+          const aoa = buildAOA();
+          const esc = (v) => {
+            v = v == null ? "" : String(v);
+            return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+          };
+          const csv = "\uFEFF" + aoa.map((r) => r.map(esc).join(",")).join("\n");
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "poy_" + fileStamp() + ".csv";
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
+      }
+
+      /* ---------- ບັນທຶກ / ປະຫວັດ ---------- */
+      const STORAGE_OK = (function () {
+        try {
+          localStorage.setItem("_poy_t", "1");
+          localStorage.removeItem("_poy_t");
+          return true;
+        } catch (e) {
+          return false;
+        }
+      })();
+      function lsGet(k) {
+        try {
+          return JSON.parse(localStorage.getItem(k));
+        } catch (e) {
+          return null;
+        }
+      }
+      function lsSet(k, v) {
+        try {
+          localStorage.setItem(k, JSON.stringify(v));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+      function uuid() {
+        try {
+          if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        } catch (e) {}
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+          const r = (Math.random() * 16) | 0;
+          return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+        });
+      }
+      function updateSessionBadge() {
+        const el = document.getElementById("sessBadge");
+        if (el) el.textContent = currentName || "—";
+      }
+      let saveTimer = null;
+      function writeNow() {
+        if (saveTimer) {
+          clearTimeout(saveTimer);
+          saveTimer = null;
+        }
+        if (!currentId || !STORAGE_OK) return;
+        const sessions = lsGet("poy_sessions") || [];
+        const idx = sessions.findIndex((s) => s.id === currentId);
+        if (idx < 0 && !rows.length) return;
+        const entryObj = {
+          id: currentId,
+          name: currentName,
+          updatedAt: Date.now(),
+          data: { rows, segMeta, notes, segCounter },
+        };
+        if (idx >= 0) sessions[idx] = entryObj;
+        else sessions.push(entryObj);
+        sessions.sort((a, b) => b.updatedAt - a.updatedAt);
+        lsSet("poy_sessions", sessions.slice(0, 60));
+        lsSet("poy_current", currentId);
+      }
+      function saveState() {
+        if (!currentId || !STORAGE_OK) return;
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(writeNow, 350);
+      }
+      function stamp() {
+        const d = new Date(),
+          p = (n) => String(n).padStart(2, "0");
+        return (
+          p(d.getDate()) +
+          "/" +
+          p(d.getMonth() + 1) +
+          " " +
+          p(d.getHours()) +
+          ":" +
+          p(d.getMinutes())
+        );
+      }
+      function newSession() {
+        writeNow();
+        currentId = uuid();
+        currentName = "ໂພຍ " + stamp();
+        rows = [];
+        segMeta = {};
+        notes = [];
+        segCounter = 0;
+        prevBet = null;
+        lsSet("poy_current", currentId);
+        saveState();
+        renderAll();
+        updateSessionBadge();
+        hideOverlay();
+        entry.focus();
+      }
+      function startResume() {
+        const cur = STORAGE_OK ? lsGet("poy_current") : null;
+        const sessions = lsGet("poy_sessions") || [];
+        if (cur && sessions.some((s) => s.id === cur)) loadSession(cur);
+        else if (sessions.length) loadSession(sessions[0].id);
+        else newSession();
+      }
+      function loadSession(id) {
+        writeNow();
+        const sessions = lsGet("poy_sessions") || [];
+        const s = sessions.find((x) => x.id === id);
+        if (!s) {
+          newSession();
+          return;
+        }
+        currentId = s.id;
+        currentName = s.name || "";
+        prevBet = null;
+        rows = (s.data && s.data.rows) || [];
+        segMeta = (s.data && s.data.segMeta) || {};
+        // ຂໍ້ມູນເກົ່າ (bills) → ແປງເປັນ segMeta
+        const oldB = (s.data && s.data.bills) || [];
+        oldB.forEach((b) => {
+          segMeta[b.seg] = Object.assign({}, segMeta[b.seg] || {}, {
+            name: b.name,
+            stated: b.stated,
+            cur: b.cur,
+          });
+        });
+        notes = (s.data && s.data.notes) || [];
+        segCounter = (s.data && s.data.segCounter) || 0;
+        lsSet("poy_current", currentId);
+        renderAll();
+        updateSessionBadge();
+        hideOverlay();
+        entry.focus();
+      }
+      function delSession(id, ev) {
+        if (ev) ev.stopPropagation();
+        let sessions = lsGet("poy_sessions") || [];
+        sessions = sessions.filter((s) => s.id !== id);
+        lsSet("poy_sessions", sessions);
+        if (currentId === id) currentId = null;
+        renderHistory();
+      }
+      function renameSession() {
+        if (!currentId) return;
+        const n = prompt("ຕັ້ງຊື່ໃບນີ້:", currentName || "");
+        if (n !== null) {
+          currentName = n.trim() || currentName;
+          updateSessionBadge();
+          saveState();
+        }
+      }
+      function renderHistory() {
+        const warn = document.getElementById("storageWarn");
+        if (warn) warn.style.display = STORAGE_OK ? "none" : "block";
+        const el = document.getElementById("histList");
+        const sessions = lsGet("poy_sessions") || [];
+        if (!sessions.length) {
+          el.innerHTML =
+            '<div class="empty" style="padding:16px">— ຍັງບໍ່ມີປະຫວັດ —</div>';
+          return;
+        }
+        el.innerHTML = sessions
+          .map((s) => {
+            const d = new Date(s.updatedAt),
+              p = (n) => String(n).padStart(2, "0");
+            const dt =
+              p(d.getDate()) +
+              "/" +
+              p(d.getMonth() + 1) +
+              "/" +
+              String(d.getFullYear()).slice(2) +
+              " " +
+              p(d.getHours()) +
+              ":" +
+              p(d.getMinutes());
+            let lak = 0,
+              thb = 0,
+              cnt = 0;
+            ((s.data && s.data.rows) || []).forEach((r) => {
+              const c = countNums(r.nums) || 1;
+              cnt += c;
+              const t = (toNum(r.top) + toNum(r.bottom)) * c;
+              if (r.cur === "THB") thb += t;
+              else lak += t;
+            });
+            return (
+              '<div class="hist-item"><div class="hist-main" onclick="loadSession(\'' +
+              s.id +
+              "')\">" +
+              '<div class="hist-name">' +
+              escapeHtml(s.name || "ບໍ່ມີຊື່") +
+              "</div>" +
+              '<div class="hist-meta">' +
+              dt +
+              " · " +
+              cnt +
+              " ຕົວ · " +
+              fmt(lak) +
+              " ₭ · " +
+              fmt(thb) +
+              " ฿</div></div>" +
+              '<button class="hist-del" title="ລຶບ" onclick="delSession(\'' +
+              s.id +
+              "',event)\">✕</button></div>"
+            );
+          })
+          .join("");
+      }
+      function showOverlay() {
+        renderHistory();
+        document.getElementById("overlay").style.display = "flex";
+      }
+      function hideOverlay() {
+        document.getElementById("overlay").style.display = "none";
+      }
+      function closeOverlay() {
+        // ຖ້າຍັງບໍ່ທັນເປີດໃບໃດເລີຍ ໃຫ້ເປີດໃບລ່າສຸດ (ຫຼື ໃບໃໝ່) ໃຫ້ກ່ອນ
+        if (!currentId) {
+          startResume();
+          return;
+        }
+        hideOverlay();
+        entry.focus();
+      }
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Escape" &&
+          document.getElementById("overlay").style.display !== "none"
+        ) {
+          e.preventDefault();
+          closeOverlay();
+        }
+      });
+
+      /* ---------- ຕິດຕັ້ງເປັນແອັບ (PWA) ---------- */
+      let deferredPrompt = null;
+      function showInstallBtn(on) {
+        const b = document.getElementById("installBtn");
+        if (b) b.style.display = on ? "" : "none";
+      }
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallBtn(true);
+      });
+      window.addEventListener("appinstalled", () => {
+        deferredPrompt = null;
+        showInstallBtn(false);
+      });
+      async function doInstall() {
+        if (!deferredPrompt) {
+          alert(
+            "ຖ້າບໍ່ມີປຸ່ມຕິດຕັ້ງ:\n" +
+              "• Chrome / Edge (ຄອມ): ກົດຮູບ ⊕ ຫຼື ⋮ → Install / ຕິດຕັ້ງ\n" +
+              "• Android: ⋮ → Add to Home screen\n" +
+              "• iPhone / iPad: ປຸ່ມແບ່ງປັນ → Add to Home Screen",
+          );
+          return;
+        }
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        showInstallBtn(false);
+      }
+      /* ---------- ອັບເດດອັດຕະໂນມັດ + ບັງຄັບອັບເດດ ---------- */
+      const APP_VERSION = "2026.07.21-17";
+      let swReg = null;
+      let updShown = false;
+
+      function saveDraft() {
+        try {
+          localStorage.setItem("poy_draft", entry ? entry.value : "");
+        } catch (e) {}
+      }
+      function restoreDraft() {
+        try {
+          const d = localStorage.getItem("poy_draft");
+          if (d && entry && !entry.value) {
+            entry.value = d;
+            autoGrow();
+            updatePreview();
+          }
+          localStorage.removeItem("poy_draft");
+        } catch (e) {}
+      }
+
+      function forceUpdate(newVer) {
+        if (updShown) return;
+        updShown = true;
+        const m = document.getElementById("updModal");
+        const v = document.getElementById("updVer");
+        if (v)
+          v.textContent =
+            "ຂອງທ່ານ " + APP_VERSION + (newVer ? "  →  ໃໝ່ " + newVer : "");
+        if (m) m.classList.add("show");
+      }
+      async function doUpdate() {
+        const b = document.getElementById("updBtn");
+        if (b) {
+          b.disabled = true;
+          b.textContent = "ກຳລັງອັບເດດ...";
+        }
+        saveDraft();
+        try {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        } catch (e) {}
+        try {
+          if (swReg) await swReg.update();
+        } catch (e) {}
+        setTimeout(() => location.reload(), 250);
+      }
+
+      /* ກວດເວີຊັນຈາກ version.json — ໃຊ້ໄດ້ເຖິງ service worker ຈະບໍ່ທັນ */
+      async function checkVersion() {
+        if (location.protocol === "file:") return;
+        try {
+          const res = await fetch("./version.json?t=" + Date.now(), {
+            cache: "no-store",
+          });
+          if (!res.ok) return;
+          const j = await res.json();
+          if (j && j.version && j.version !== APP_VERSION)
+            forceUpdate(j.version);
+        } catch (e) {}
+      }
+
+      if ("serviceWorker" in navigator && location.protocol !== "file:") {
+        window.addEventListener("load", async () => {
+          try {
+            swReg = await navigator.serviceWorker.register("./sw.js");
+            swReg.addEventListener("updatefound", () => {
+              const nw = swReg.installing;
+              if (!nw) return;
+              nw.addEventListener("statechange", () => {
+                if (
+                  nw.state === "installed" &&
+                  navigator.serviceWorker.controller
+                )
+                  forceUpdate();
+              });
+            });
+            setInterval(() => swReg.update().catch(() => {}), 15 * 60 * 1000);
+          } catch (e) {}
+        });
+        navigator.serviceWorker.addEventListener("controllerchange", () =>
+          forceUpdate(),
+        );
+      }
+      // ກວດທຸກຄັ້ງທີ່ກັບມາເປີດແອັບ / ເນັດກັບມາ / ທຸກ 15 ນາທີ
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          checkVersion();
+          if (swReg) swReg.update().catch(() => {});
+        }
+      });
+      window.addEventListener("online", () => checkVersion());
+      setInterval(checkVersion, 15 * 60 * 1000);
+
+      /* ================= ລະບົບເປີດໃຊ້ງານ (License) ================= */
+      const LIC_URL = "./licenses.json";
+      const LIC_PEPPER = "poy-lic-v1";
+      const OFFLINE_GRACE_DAYS = 7;
+      const DAY = 86400000;
+
+      function ymd(d) {
+        const p = (n) => String(n).padStart(2, "0");
+        return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+      }
+      function daysLeft(exp) {
+        const e = new Date(exp + "T23:59:59");
+        return Math.ceil((e.getTime() - Date.now()) / DAY);
+      }
+      async function sha256hex(str) {
+        const buf = new TextEncoder().encode(str);
+        const d = await crypto.subtle.digest("SHA-256", buf);
+        return [...new Uint8Array(d)]
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+      function normKey(k) {
+        return String(k).trim().toUpperCase().replace(/\s+/g, "");
+      }
+      function deviceId() {
+        let id = null;
+        try {
+          id = localStorage.getItem("poy_dev");
+        } catch (e) {}
+        if (!id) {
+          id = "D-" + uuid().slice(0, 8).toUpperCase();
+          try {
+            localStorage.setItem("poy_dev", id);
+          } catch (e) {}
+        }
+        return id;
+      }
+
+      function licMsg(text, kind) {
+        const m = document.getElementById("licMsg");
+        m.textContent = text;
+        m.className = "lic-msg show " + (kind || "err");
+      }
+      function showLic(sub) {
+        document.body.classList.add("locked");
+        document.getElementById("lic").classList.add("show");
+        document.getElementById("licDev").textContent =
+          "ລະຫັດເຄື່ອງ: " + deviceId();
+        if (sub) licMsg(sub, "err");
+        const k = document.getElementById("licKey");
+        setTimeout(() => k.focus(), 100);
+      }
+      function showDiag() {
+        const d = document.getElementById("licDev");
+        if (d)
+          d.textContent =
+            "ລະຫັດເຄື່ອງ: " +
+            deviceId() +
+            "  ·  ທີ່ຢູ່: " +
+            location.protocol +
+            "//" +
+            (location.host || "(ໄຟລ໌ໃນເຄື່ອງ)");
+      }
+      function hideLic() {
+        document.body.classList.remove("locked");
+        document.getElementById("lic").classList.remove("show");
+      }
+
+      /* ດຶງລາຍຊື່ລະຫັດຈາກເຊີບເວີ (ໄຟລ໌ licenses.json ໃນ repo) */
+      function licErr(code, extra) {
+        const e = new Error(code);
+        e.code = code;
+        e.extra = extra;
+        return e;
+      }
+      function licErrMsg(e) {
+        switch (e && e.code) {
+          case "file":
+            return (
+              "ເປີດຈາກໄຟລ໌ໂດຍກົງ (file://) ກວດສິດບໍ່ໄດ້\n" +
+              "ໃຫ້ເປີດຜ່ານ START-WINDOWS.bat ຫຼື ລິ້ງເວັບ https://…"
+            );
+          case "404":
+            return (
+              "ບໍ່ພົບໄຟລ໌ licenses.json ເທິງເຊີບເວີ\n" +
+              "ກວດວ່າໄດ້ອັບໄຟລ໌ຂຶ້ນ ແລະ commit ແລ້ວບໍ"
+            );
+          case "json":
+            return "ໄຟລ໌ licenses.json ຮູບແບບບໍ່ຖືກຕ້ອງ";
+          case "http":
+            return "ເຊີບເວີຕອບກັບລະຫັດ " + e.extra;
+          default:
+            return "ຕໍ່ອິນເຕີເນັດບໍ່ໄດ້ — ກະລຸນາລອງໃໝ່";
+        }
+      }
+      async function fetchLicenses() {
+        if (location.protocol === "file:") throw licErr("file");
+        let res;
+        try {
+          res = await fetch(LIC_URL + "?t=" + Date.now(), {
+            cache: "no-store",
+          });
+        } catch (err) {
+          throw licErr("net");
+        }
+        if (res.status === 404) throw licErr("404");
+        if (!res.ok) throw licErr("http", res.status);
+        try {
+          return await res.json();
+        } catch (err) {
+          throw licErr("json");
+        }
+      }
+      async function verifyOnline(key) {
+        const h = await sha256hex(LIC_PEPPER + "|" + normKey(key));
+        const data = await fetchLicenses();
+        const rec = (data && data.licenses && data.licenses[h]) || null;
+        if (!rec) return { ok: false, msg: "ລະຫັດບໍ່ຖືກຕ້ອງ ຫຼື ຖືກຍົກເລີກແລ້ວ" };
+        if (rec.off === true)
+          return { ok: false, msg: "ລະຫັດນີ້ຖືກປິດການໃຊ້ງານ" };
+        if (ymd(new Date()) > rec.exp)
+          return {
+            ok: false,
+            msg: "ລະຫັດໝົດອາຍຸແລ້ວ (" + rec.exp + ") ກະລຸນາຕໍ່ອາຍຸ",
+            exp: rec.exp,
+          };
+        return { ok: true, exp: rec.exp, label: rec.label || "", hash: h };
+      }
+
+      function saveLic(o) {
+        try {
+          localStorage.setItem("poy_lic", JSON.stringify(o));
+        } catch (e) {}
+      }
+      function loadLic() {
+        try {
+          return JSON.parse(localStorage.getItem("poy_lic"));
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function paintExpiry(exp) {
+        const pill = document.getElementById("expPill");
+        if (!pill || !exp) return;
+        const d = daysLeft(exp);
+        pill.style.display = "";
+        pill.textContent =
+          d <= 7 ? "ເຫຼືອ " + d + " ວັນ · " + exp : "ໃຊ້ໄດ້ຮອດ " + exp;
+        pill.className = "exp-pill" + (d <= 7 ? " warn" : "");
+      }
+
+      async function activate() {
+        const btn = document.getElementById("licBtn");
+        const key = normKey(document.getElementById("licKey").value);
+        if (key.length < 6) {
+          licMsg("ກະລຸນາໃສ່ລະຫັດໃຫ້ຄົບ", "err");
+          return;
+        }
+        btn.disabled = true;
+        btn.textContent = "ກຳລັງກວດສອບ...";
+        try {
+          const r = await verifyOnline(key);
+          if (!r.ok) {
+            licMsg(r.msg, "err");
+          } else {
+            saveLic({
+              key,
+              exp: r.exp,
+              label: r.label,
+              lastOk: Date.now(),
+              seen: Date.now(),
+            });
+            licMsg("ເປີດໃຊ້ງານສຳເລັດ ໃຊ້ໄດ້ຮອດ " + r.exp, "ok");
+            setTimeout(() => {
+              hideLic();
+              startApp(r.exp);
+            }, 700);
+          }
+        } catch (e) {
+          licMsg(licErrMsg(e), "err");
+          showDiag();
+        }
+        btn.disabled = false;
+        btn.textContent = "ເປີດໃຊ້ງານ";
+      }
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Enter" &&
+          document.getElementById("lic").classList.contains("show")
+        )
+          activate();
+      });
+
+      async function bootLicense() {
+        const lic = loadLic();
+        if (!lic || !lic.key) {
+          showLic();
+          return;
+        }
+        // ກັນການໝູນນາຟິກາເຄື່ອງຍ້ອນຫຼັງ
+        if (lic.seen && Date.now() < lic.seen - DAY) {
+          showLic("ວັນທີໃນເຄື່ອງບໍ່ຖືກຕ້ອງ — ກະລຸນາຕັ້ງເວລາໃໝ່ ແລ້ວເປີດອີກຄັ້ງ");
+          return;
+        }
+        try {
+          const r = await verifyOnline(lic.key);
+          if (!r.ok) {
+            showLic(r.msg);
+            return;
+          }
+          lic.exp = r.exp;
+          lic.label = r.label;
+          lic.lastOk = Date.now();
+        } catch (e) {
+          // ບໍ່ມີເນັດ — ໃຫ້ໃຊ້ຕໍ່ພາຍໃນໄລຍະຜ່ອນຜັນ
+          if (ymd(new Date()) > lic.exp) {
+            showLic("ລະຫັດໝົດອາຍຸແລ້ວ (" + lic.exp + ")");
+            return;
+          }
+          if (Date.now() - (lic.lastOk || 0) > OFFLINE_GRACE_DAYS * DAY) {
+            showLic(
+              "ໃຊ້ແບບບໍ່ມີເນັດຄົບ " +
+                OFFLINE_GRACE_DAYS +
+                " ວັນແລ້ວ\n" +
+                licErrMsg(e),
+            );
+            showDiag();
+            return;
+          }
+        }
+        lic.seen = Date.now();
+        saveLic(lic);
+        hideLic();
+        startApp(lic.exp);
+      }
+
+      function startApp(exp) {
+        const v = document.getElementById("verLine");
+        if (v) v.textContent = "ເວີຊັນ " + APP_VERSION;
+        checkVersion();
+        restoreDraft();
+        paintExpiry(exp);
+        renderAll();
+        updateSessionBadge();
+        autoGrow();
+        syncStick();
+        showOverlay();
+      }
+
+      /* ---------- init ---------- */
+      function hideBoot() {
+        const b = document.getElementById("boot");
+        if (b) b.classList.add("hide");
+      }
+      function sleep(ms) {
+        return new Promise((r) => setTimeout(r, ms));
+      }
+      async function boot() {
+        document.body.classList.add("locked");
+        const t0 = Date.now();
+        // ກວດເວີຊັນກ່ອນເຂົ້າໃຊ້ງານ (ລໍຖ້າສູງສຸດ 6 ວິນາທີ)
+        await Promise.race([checkVersion(), sleep(6000)]);
+        if (updShown) {
+          hideBoot(); // ມີເວີຊັນໃໝ່ → ບັງຄັບອັບເດດ
+          return;
+        }
+        const el = document.getElementById("bootMsg");
+        if (el) el.textContent = "ກຳລັງກວດສິດການໃຊ້ງານ…";
+        await sleep(Math.max(0, 450 - (Date.now() - t0)));
+        hideBoot();
+        bootLicense();
+      }
+      boot();
+    </script>
+  </body>
+</html>

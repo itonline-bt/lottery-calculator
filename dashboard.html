@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="lo">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>ພາບລວມ · Dashboard</title>
+    <link rel="icon" href="./assets/favicon.ico" sizes="any" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --em-900: #043d31;
+        --em-800: #065f46;
+        --em-700: #047857;
+        --em-600: #059669;
+        --em-500: #10b981;
+        --em-100: #d1fae5;
+        --em-50: #ecfdf5;
+        --ink: #08221b;
+        --ink-2: #234b40;
+        --muted: #5f7d73;
+        --line: #d7e5df;
+        --line-2: #e9f2ee;
+        --page: #eef4f1;
+        --panel: #f4f9f7;
+        --top: #0f766e;
+        --top-bg: #e0f2f0;
+        --bottom: #b45309;
+        --bottom-bg: #fdf1e0;
+        --thb: #4338ca;
+        --thb-bg: #e8e9fd;
+        --bad: #d24141;
+        --bad-bg: #fbeaea;
+        --num: "JetBrains Mono", ui-monospace, monospace;
+        --sh: 0 1px 2px rgba(6, 95, 70, 0.06), 0 10px 30px rgba(6, 95, 70, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        background: var(--page);
+        color: var(--ink);
+        font-family: "Noto Sans Lao", system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .num {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .lock {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(140deg, var(--em-900), var(--em-700));
+      }
+      .lock.hide {
+        display: none;
+      }
+      .lock-card {
+        background: #fff;
+        border-radius: 22px;
+        max-width: 400px;
+        width: 100%;
+        padding: 32px 28px;
+        text-align: center;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      }
+      .lock h1 {
+        font-size: 22px;
+        color: var(--em-800);
+        margin: 0 0 4px;
+      }
+      .lock p {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 0 0 20px;
+      }
+      #pass {
+        width: 100%;
+        border: 2px solid var(--line);
+        border-radius: 12px;
+        padding: 13px;
+        font-size: 18px;
+        text-align: center;
+        font-family: var(--num);
+      }
+
+      .topbar {
+        background: linear-gradient(115deg, var(--em-900), var(--em-700) 55%, var(--em-600));
+        color: #fff;
+        padding: 14px 22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+      .topbar h1 {
+        font-size: 21px;
+        font-weight: 900;
+        margin: 0;
+      }
+      .topbar .sp {
+        margin-left: auto;
+      }
+      .navlink {
+        color: #fff;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-size: 14.5px;
+        font-weight: 700;
+      }
+      .navlink:hover {
+        background: rgba(255, 255, 255, 0.27);
+      }
+
+      .wrap {
+        padding: 20px 22px 60px;
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px 20px;
+        box-shadow: var(--sh);
+        margin-bottom: 18px;
+      }
+      .card h2 {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--em-800);
+        margin: 0 0 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .card h2 .sub {
+        font-weight: 500;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .kpi {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px 16px;
+        box-shadow: var(--sh);
+      }
+      .kpi .k {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .kpi .v {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        font-size: 26px;
+        margin-top: 2px;
+      }
+      .kpi.lak .v {
+        color: var(--em-700);
+      }
+      .kpi.thb .v {
+        color: var(--thb);
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 5px;
+      }
+      input,
+      select {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        padding: 10px 13px;
+        font-size: 16px;
+        font-family: inherit;
+        background: #fff;
+        color: var(--ink);
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--em-500);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      }
+      input.numin {
+        font-family: var(--num);
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .row {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .row.c4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .row.c3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .row.c2 {
+        grid-template-columns: 1fr 1fr;
+      }
+      @media (max-width: 780px) {
+        .row.c4,
+        .row.c3,
+        .row.c2 {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 480px) {
+        .row.c4,
+        .row.c3,
+        .row.c2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        padding: 11px 18px;
+        border-radius: 11px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink-2);
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--em-50);
+        border-color: var(--em-500);
+      }
+      button.p {
+        background: var(--em-700);
+        color: #fff;
+        border-color: var(--em-700);
+      }
+      button.p:hover {
+        background: var(--em-800);
+      }
+      button.mini {
+        padding: 7px 13px;
+        font-size: 13.5px;
+        border-radius: 9px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--line-2);
+        vertical-align: middle;
+      }
+      th {
+        font-size: 12.5px;
+        color: var(--muted);
+        font-weight: 700;
+        border-bottom: 2px solid var(--em-100);
+        white-space: nowrap;
+      }
+      td.r,
+      th.r {
+        text-align: right;
+      }
+      td.n {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+      }
+      tbody tr:hover td {
+        background: #f7fdfa;
+      }
+      .scroll {
+        overflow-x: auto;
+      }
+
+      .bar {
+        height: 10px;
+        border-radius: 6px;
+        background: var(--line-2);
+        overflow: hidden;
+        margin-top: 6px;
+      }
+      .bar span {
+        display: block;
+        height: 100%;
+      }
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 780px) {
+        .split {
+          grid-template-columns: 1fr;
+        }
+      }
+      .legend {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13.5px;
+        margin-top: 8px;
+      }
+      .legend b {
+        font-family: var(--num);
+      }
+
+      .pill {
+        font-family: var(--num);
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 3px 11px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .pill.lak {
+        background: var(--em-100);
+        color: var(--em-800);
+      }
+      .pill.thb {
+        background: var(--thb-bg);
+        color: var(--thb);
+      }
+      .pill.hot {
+        background: var(--bad-bg);
+        color: var(--bad);
+      }
+      .pill.top {
+        background: var(--top-bg);
+        color: var(--top);
+      }
+      .pill.bot {
+        background: var(--bottom-bg);
+        color: var(--bottom);
+      }
+      .empty {
+        text-align: center;
+        color: var(--muted);
+        padding: 26px;
+      }
+      .note {
+        background: var(--bottom-bg);
+        border: 1px solid #f0d9b8;
+        color: var(--bottom);
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 13.5px;
+        line-height: 1.7;
+        margin-top: 12px;
+      }
+      .winbox {
+        background: linear-gradient(120deg, var(--em-900), var(--em-700));
+        color: #fff;
+        border-radius: 14px;
+        padding: 16px 18px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+      }
+      .winbox .k {
+        font-size: 13px;
+        opacity: 0.82;
+      }
+      .winbox .v {
+        font-family: var(--num);
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        font-size: 24px;
+      }
+      .winbox .v.neg {
+        color: #fca5a5;
+      }
+      svg.chart {
+        width: 100%;
+        height: 220px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="lock" id="lock">
+      <div class="lock-card">
+        <h1>ພາບລວມລະບົບ</h1>
+        <p>ໃສ່ລະຫັດຜ່ານຂອງເຈົ້າຂອງ</p>
+        <input id="pass" type="password" placeholder="••••••••" />
+        <button
+          class="p"
+          style="width: 100%; margin-top: 12px; padding: 14px"
+          onclick="unlock()"
+        >
+          ເຂົ້າສູ່ລະບົບ
+        </button>
+        <div id="lockMsg" style="color: var(--bad); font-size: 14px; margin-top: 10px"></div>
+      </div>
+    </div>
+
+    <div class="topbar">
+      <h1>ພາບລວມ</h1>
+      <span class="sp"></span>
+      <a class="navlink" href="./index.html">ໜ້າຄິດໄລ່</a>
+      <a class="navlink" href="./owner.html">ຈັດການລູກຄ້າ</a>
+    </div>
+
+    <div class="wrap">
+      <!-- ຕົວກອງ -->
+      <div class="card">
+        <h2>ຕົວກອງ <span class="sub" id="srcInfo"></span></h2>
+        <div class="row c4">
+          <div>
+            <label>ຈາກວັນທີ</label>
+            <input type="date" id="fFrom" onchange="render()" />
+          </div>
+          <div>
+            <label>ຮອດວັນທີ</label>
+            <input type="date" id="fTo" onchange="render()" />
+          </div>
+          <div>
+            <label>ສະກຸນ</label>
+            <select id="fCur" onchange="render()">
+              <option value="">ທັງໝົດ</option>
+              <option value="LAK">ກີບ ₭</option>
+              <option value="THB">ບາດ ฿</option>
+            </select>
+          </div>
+          <div>
+            <label>ຄົ້ນຫາ (ເລກ ຫຼື ຊື່)</label>
+            <input id="fQ" placeholder="ເຊັ່ນ 507 ຫຼື ນ້ອຍ" oninput="render()" />
+          </div>
+        </div>
+        <button class="mini" onclick="quickRange(7)">7 ວັນ</button>
+        <button class="mini" onclick="quickRange(30)">30 ວັນ</button>
+        <button class="mini" onclick="quickRange(0)">ທັງໝົດ</button>
+      </div>
+
+      <div class="kpis" id="kpis"></div>
+
+      <!-- ກວດເລກອອກ -->
+      <div class="card">
+        <h2>ກວດເລກທີ່ອອກ <span class="sub">ໃສ່ເລກແລ້ວລະບົບຈະຫາວ່າໃຜຖືກ</span></h2>
+        <div class="row c4">
+          <div>
+            <label>ເລກບົນ</label>
+            <input class="numin" id="drawTop" placeholder="ເຊັ່ນ 507" oninput="render()" />
+          </div>
+          <div>
+            <label>ເລກລຸ່ມ</label>
+            <input class="numin" id="drawBottom" placeholder="ເຊັ່ນ 07" oninput="render()" />
+          </div>
+          <div>
+            <label>ຈ່າຍ 2 ຕົວ (ເທົ່າ)</label>
+            <input class="numin" id="rate2" type="number" value="90" oninput="saveRates();render()" />
+          </div>
+          <div>
+            <label>ຈ່າຍ 3 ຕົວ (ເທົ່າ)</label>
+            <input class="numin" id="rate3" type="number" value="800" oninput="saveRates();render()" />
+          </div>
+        </div>
+        <div id="winSummary"></div>
+        <div class="scroll" style="margin-top: 14px">
+          <table>
+            <thead>
+              <tr>
+                <th>ວັນທີ</th>
+                <th>ຊຸດ / ລູກຄ້າ</th>
+                <th>ເລກ</th>
+                <th>ປະເພດ</th>
+                <th class="r">ເງິນແທງ</th>
+                <th class="r">ຕ້ອງຈ່າຍ</th>
+              </tr>
+            </thead>
+            <tbody id="winRows"></tbody>
+          </table>
+        </div>
+        <div id="winEmpty" class="empty">— ໃສ່ເລກບົນ ຫຼື ເລກລຸ່ມ ເພື່ອກວດ —</div>
+        <div class="note">
+          <b>ອັດຕາຈ່າຍ</b> ຕ້ອງຕັ້ງເອງໃຫ້ຕົງກັບທີ່ໃຊ້ຈິງ — ຄ່າທີ່ໃສ່ໄວ້ເປັນພຽງຕົວຢ່າງ<br />
+          ການທຽບໃຊ້ຕົວທ້າຍ: ເລກ 2 ຕົວທຽບກັບ 2 ໂຕທ້າຍ, 3 ຕົວທຽບກັບ 3 ໂຕທ້າຍ
+        </div>
+      </div>
+
+      <!-- ກຣາຟລາຍວັນ -->
+      <div class="card">
+        <h2>ຍອດລາຍວັນ <span class="sub" id="chartInfo"></span></h2>
+        <svg class="chart" id="chart" viewBox="0 0 900 220" preserveAspectRatio="none"></svg>
+        <div class="legend">
+          <span><span class="pill lak">₭ ກີບ</span></span>
+          <span><span class="pill thb">฿ ບາດ</span></span>
+        </div>
+      </div>
+
+      <div class="split">
+        <!-- ສັດສ່ວນ -->
+        <div class="card">
+          <h2>ສັດສ່ວນ ບົນ / ລຸ່ມ</h2>
+          <div id="ratioTB"></div>
+          <h2 style="margin-top: 22px">ສັດສ່ວນ ກີບ / ບາດ</h2>
+          <div id="ratioCur"></div>
+        </div>
+
+        <!-- ເລກແທງໜັກ -->
+        <div class="card">
+          <h2>ເລກທີ່ແທງໜັກ <span class="sub">ຄວາມສ່ຽງສູງ 20 ອັນດັບ</span></h2>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>ເລກ</th>
+                  <th class="r">ຈຳນວນຄັ້ງ</th>
+                  <th class="r">ບົນ</th>
+                  <th class="r">ລຸ່ມ</th>
+                  <th class="r">ລວມ</th>
+                </tr>
+              </thead>
+              <tbody id="hotRows"></tbody>
+            </table>
+          </div>
+          <div id="hotEmpty" class="empty">— ບໍ່ມີຂໍ້ມູນ —</div>
+        </div>
+      </div>
+
+      <!-- ລູກຄ້າ -->
+      <div class="card">
+        <h2>ສະຫຼຸບຕາມລູກຄ້າ</h2>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>ຊື່</th>
+                <th class="r">ຈຳນວນຊຸດ</th>
+                <th class="r">ຈຳນວນຕົວ</th>
+                <th class="r">ກີບ ₭</th>
+                <th class="r">ບາດ ฿</th>
+              </tr>
+            </thead>
+            <tbody id="custRows"></tbody>
+          </table>
+        </div>
+        <div id="custEmpty" class="empty">— ບໍ່ມີຂໍ້ມູນ —</div>
+      </div>
+
+      <!-- ໃບໂພຍ -->
+      <div class="card">
+        <h2>ໃບໂພຍທັງໝົດ</h2>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>ວັນທີ</th>
+                <th>ຊື່ໃບ</th>
+                <th class="r">ຊຸດ</th>
+                <th class="r">ລາຍການ</th>
+                <th class="r">ກີບ ₭</th>
+                <th class="r">ບາດ ฿</th>
+              </tr>
+            </thead>
+            <tbody id="sheetRows"></tbody>
+          </table>
+        </div>
+        <div id="sheetEmpty" class="empty">— ບໍ່ມີໃບໂພຍທີ່ບັນທຶກໄວ້ —</div>
+        <div style="margin-top: 14px">
+          <button class="mini" onclick="exportCsv()">ດາວໂຫຼດ CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+      /* ລະຫັດຜ່ານດຽວກັບ owner.html — ຖ້າປ່ຽນ ໃຫ້ປ່ຽນທັງສອງໄຟລ໌ */
+      const OWNER_HASH =
+        "2f5e66c3aaf7275cac84d2e6f49855d5f2b501d2387563ce78038e991c57daa0";
+
+      let sheets = []; // {id, name, date, rows[], segMeta{}}
+
+      async function sha256hex(str) {
+        const d = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(str),
+        );
+        return [...new Uint8Array(d)]
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+      async function unlock() {
+        const h = await sha256hex(document.getElementById("pass").value);
+        if (h === OWNER_HASH) {
+          sessionStorage.setItem("poy_owner_ok", "1");
+          document.getElementById("lock").classList.add("hide");
+          init();
+        } else {
+          document.getElementById("lockMsg").textContent = "ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ";
+        }
+      }
+      document.getElementById("pass").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") unlock();
+      });
+
+      /* ---------- helpers ---------- */
+      function toNum(x) {
+        const n = parseFloat(String(x).replace(/[^\d.\-]/g, ""));
+        return isNaN(n) ? 0 : n;
+      }
+      function countNums(s) {
+        return (
+          String(s)
+            .split(/[-,\s\/_]+/)
+            .map((t) => t.trim())
+            .filter((t) => /^\d+$/.test(t)).length || 0
+        );
+      }
+      function numList(s) {
+        return String(s)
+          .split(/[-,\s\/_]+/)
+          .map((t) => t.trim())
+          .filter((t) => /^\d+$/.test(t));
+      }
+      function rowTotal(r) {
+        return (toNum(r.top) + toNum(r.bottom)) * (countNums(r.nums) || 1);
+      }
+      function fmt(n) {
+        return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString("en-US");
+      }
+      function ymd(d) {
+        const p = (n) => String(n).padStart(2, "0");
+        return (
+          d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate())
+        );
+      }
+      function esc(s) {
+        return String(s == null ? "" : s).replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      }
+
+      /* ---------- ໂຫຼດຂໍ້ມູນຈາກເຄື່ອງນີ້ ---------- */
+      function loadSheets() {
+        let raw = [];
+        try {
+          raw = JSON.parse(localStorage.getItem("poy_sessions")) || [];
+        } catch (e) {
+          raw = [];
+        }
+        sheets = raw.map((s) => {
+          const d = s.data || {};
+          const segMeta = Object.assign({}, d.segMeta || {});
+          (d.bills || []).forEach((b) => {
+            segMeta[b.seg] = Object.assign({}, segMeta[b.seg] || {}, {
+              name: b.name,
+              stated: b.stated,
+            });
+          });
+          return {
+            id: s.id,
+            name: s.name || "",
+            date: ymd(new Date(s.updatedAt || Date.now())),
+            ts: s.updatedAt || 0,
+            rows: d.rows || [],
+            segMeta,
+          };
+        });
+        sheets.sort((a, b) => b.ts - a.ts);
+        document.getElementById("srcInfo").textContent =
+          "ຂໍ້ມູນຈາກເຄື່ອງນີ້ · " + sheets.length + " ໃບ";
+      }
+
+      /* ---------- ຕົວກອງ ---------- */
+      function filtered() {
+        const from = document.getElementById("fFrom").value;
+        const to = document.getElementById("fTo").value;
+        const cur = document.getElementById("fCur").value;
+        const q = document.getElementById("fQ").value.trim().toLowerCase();
+        const out = [];
+        sheets.forEach((sh) => {
+          if (from && sh.date < from) return;
+          if (to && sh.date > to) return;
+          const rows = sh.rows.filter((r) => {
+            if (cur && (r.cur || "LAK") !== cur) return false;
+            if (q) {
+              const nm = (
+                (sh.segMeta[r.seg] && sh.segMeta[r.seg].name) ||
+                ""
+              ).toLowerCase();
+              if (
+                String(r.nums).indexOf(q) < 0 &&
+                nm.indexOf(q) < 0 &&
+                sh.name.toLowerCase().indexOf(q) < 0
+              )
+                return false;
+            }
+            return true;
+          });
+          if (rows.length) out.push(Object.assign({}, sh, { rows }));
+        });
+        return out;
+      }
+      function quickRange(days) {
+        const to = new Date();
+        document.getElementById("fTo").value = days ? ymd(to) : "";
+        if (days) {
+          const f = new Date();
+          f.setDate(f.getDate() - days + 1);
+          document.getElementById("fFrom").value = ymd(f);
+        } else {
+          document.getElementById("fFrom").value = "";
+        }
+        render();
+      }
+
+      /* ---------- ອັດຕາຈ່າຍ ---------- */
+      function saveRates() {
+        try {
+          localStorage.setItem(
+            "poy_rates",
+            JSON.stringify({
+              r2: document.getElementById("rate2").value,
+              r3: document.getElementById("rate3").value,
+            }),
+          );
+        } catch (e) {}
+      }
+      function loadRates() {
+        try {
+          const r = JSON.parse(localStorage.getItem("poy_rates"));
+          if (r) {
+            if (r.r2) document.getElementById("rate2").value = r.r2;
+            if (r.r3) document.getElementById("rate3").value = r.r3;
+          }
+        } catch (e) {}
+      }
+      function rateFor(len) {
+        if (len <= 2) return toNum(document.getElementById("rate2").value);
+        return toNum(document.getElementById("rate3").value);
+      }
+      function hit(n, drawn) {
+        const a = String(n).replace(/\D/g, "");
+        const b = String(drawn || "").replace(/\D/g, "");
+        if (!a || !b || a.length > b.length) return false;
+        return b.slice(-a.length) === a;
+      }
+
+      /* ---------- render ---------- */
+      function render() {
+        const data = filtered();
+        renderKpis(data);
+        renderWin(data);
+        renderChart(data);
+        renderRatios(data);
+        renderHot(data);
+        renderCustomers(data);
+        renderSheets(data);
+      }
+
+      function totals(data) {
+        let lak = 0,
+          thb = 0,
+          top = 0,
+          bot = 0,
+          cnt = 0,
+          lines = 0,
+          sets = 0;
+        data.forEach((sh) => {
+          const segs = {};
+          sh.rows.forEach((r) => {
+            const c = countNums(r.nums) || 1;
+            const t = rowTotal(r);
+            cnt += c;
+            lines++;
+            segs[r.seg] = 1;
+            top += toNum(r.top) * c;
+            bot += toNum(r.bottom) * c;
+            if ((r.cur || "LAK") === "THB") thb += t;
+            else lak += t;
+          });
+          sets += Object.keys(segs).length;
+        });
+        return { lak, thb, top, bot, cnt, lines, sets, sheets: data.length };
+      }
+
+      function renderKpis(data) {
+        const t = totals(data);
+        document.getElementById("kpis").innerHTML =
+          '<div class="kpi lak"><div class="k">ລວມກີບ</div><div class="v">' +
+          fmt(t.lak) +
+          ' ₭</div></div>' +
+          '<div class="kpi thb"><div class="k">ລວມບາດ</div><div class="v">' +
+          fmt(t.thb) +
+          ' ฿</div></div>' +
+          '<div class="kpi"><div class="k">ຈຳນວນຕົວ</div><div class="v">' +
+          fmt(t.cnt) +
+          "</div></div>" +
+          '<div class="kpi"><div class="k">ຈຳນວນຊຸດ</div><div class="v">' +
+          fmt(t.sets) +
+          "</div></div>" +
+          '<div class="kpi"><div class="k">ໃບໂພຍ</div><div class="v">' +
+          fmt(t.sheets) +
+          "</div></div>";
+      }
+
+      /* ---------- ກວດເລກອອກ ---------- */
+      function renderWin(data) {
+        const dt = document.getElementById("drawTop").value.trim();
+        const db = document.getElementById("drawBottom").value.trim();
+        const tb = document.getElementById("winRows");
+        const empty = document.getElementById("winEmpty");
+        const sum = document.getElementById("winSummary");
+        tb.innerHTML = "";
+        if (!dt && !db) {
+          empty.style.display = "block";
+          empty.textContent = "— ໃສ່ເລກບົນ ຫຼື ເລກລຸ່ມ ເພື່ອກວດ —";
+          sum.innerHTML = "";
+          return;
+        }
+        const wins = [];
+        let payLak = 0,
+          payThb = 0;
+        data.forEach((sh) => {
+          sh.rows.forEach((r) => {
+            const cur = (r.cur || "LAK") === "THB" ? "THB" : "LAK";
+            const nm =
+              (sh.segMeta[r.seg] && sh.segMeta[r.seg].name) || "ຊຸດ " + r.seg;
+            numList(r.nums).forEach((n) => {
+              const rate = rateFor(n.length);
+              if (dt && toNum(r.top) && hit(n, dt)) {
+                const pay = toNum(r.top) * rate;
+                wins.push({
+                  date: sh.date,
+                  name: nm,
+                  n,
+                  kind: "ບົນ",
+                  stake: toNum(r.top),
+                  pay,
+                  cur,
+                });
+                cur === "THB" ? (payThb += pay) : (payLak += pay);
+              }
+              if (db && toNum(r.bottom) && hit(n, db)) {
+                const pay = toNum(r.bottom) * rate;
+                wins.push({
+                  date: sh.date,
+                  name: nm,
+                  n,
+                  kind: "ລຸ່ມ",
+                  stake: toNum(r.bottom),
+                  pay,
+                  cur,
+                });
+                cur === "THB" ? (payThb += pay) : (payLak += pay);
+              }
+            });
+          });
+        });
+        const t = totals(data);
+        const netLak = t.lak - payLak;
+        const netThb = t.thb - payThb;
+        sum.innerHTML =
+          '<div class="winbox">' +
+          '<div><div class="k">ຈຳນວນທີ່ຖືກ</div><div class="v">' +
+          fmt(wins.length) +
+          " ລາຍການ</div></div>" +
+          '<div><div class="k">ຕ້ອງຈ່າຍ (ກີບ)</div><div class="v">' +
+          fmt(payLak) +
+          " ₭</div></div>" +
+          '<div><div class="k">ຕ້ອງຈ່າຍ (ບາດ)</div><div class="v">' +
+          fmt(payThb) +
+          " ฿</div></div>" +
+          '<div><div class="k">ກຳໄລ/ຂາດທຶນ ກີບ</div><div class="v' +
+          (netLak < 0 ? " neg" : "") +
+          '">' +
+          fmt(netLak) +
+          " ₭</div></div>" +
+          '<div><div class="k">ກຳໄລ/ຂາດທຶນ ບາດ</div><div class="v' +
+          (netThb < 0 ? " neg" : "") +
+          '">' +
+          fmt(netThb) +
+          " ฿</div></div></div>";
+
+        if (!wins.length) {
+          empty.style.display = "block";
+          empty.textContent = "— ບໍ່ມີໃຜຖືກ —";
+          return;
+        }
+        empty.style.display = "none";
+        wins.sort((a, b) => b.pay - a.pay);
+        tb.innerHTML = wins
+          .map(
+            (w) =>
+              "<tr><td class='n'>" +
+              w.date +
+              "</td><td>" +
+              esc(w.name) +
+              "</td><td class='n'>" +
+              w.n +
+              '</td><td><span class="pill ' +
+              (w.kind === "ບົນ" ? "top" : "bot") +
+              '">' +
+              w.kind +
+              '</span></td><td class="r n">' +
+              fmt(w.stake) +
+              (w.cur === "THB" ? " ฿" : " ₭") +
+              '</td><td class="r n" style="color:var(--bad)">' +
+              fmt(w.pay) +
+              (w.cur === "THB" ? " ฿" : " ₭") +
+              "</td></tr>",
+          )
+          .join("");
+      }
+
+      /* ---------- ກຣາຟລາຍວັນ ---------- */
+      function renderChart(data) {
+        const byDay = {};
+        data.forEach((sh) => {
+          if (!byDay[sh.date]) byDay[sh.date] = { lak: 0, thb: 0 };
+          sh.rows.forEach((r) => {
+            const t = rowTotal(r);
+            if ((r.cur || "LAK") === "THB") byDay[sh.date].thb += t;
+            else byDay[sh.date].lak += t;
+          });
+        });
+        const days = Object.keys(byDay).sort().slice(-30);
+        const svg = document.getElementById("chart");
+        document.getElementById("chartInfo").textContent =
+          days.length + " ວັນລ່າສຸດ";
+        if (!days.length) {
+          svg.innerHTML =
+            '<text x="450" y="110" text-anchor="middle" fill="#5f7d73" font-size="15">ບໍ່ມີຂໍ້ມູນ</text>';
+          return;
+        }
+        const W = 900,
+          H = 220,
+          pad = 26;
+        const max = Math.max(
+          1,
+          ...days.map((d) => Math.max(byDay[d].lak, byDay[d].thb)),
+        );
+        const bw = (W - pad * 2) / days.length;
+        let out = "";
+        days.forEach((d, i) => {
+          const x = pad + i * bw;
+          const hl = ((H - 40) * byDay[d].lak) / max;
+          const ht = ((H - 40) * byDay[d].thb) / max;
+          const w = Math.max(3, bw / 2 - 3);
+          out +=
+            '<rect x="' +
+            (x + 1) +
+            '" y="' +
+            (H - 20 - hl) +
+            '" width="' +
+            w +
+            '" height="' +
+            hl +
+            '" rx="3" fill="#10b981"><title>' +
+            d +
+            " · ກີບ " +
+            fmt(byDay[d].lak) +
+            "</title></rect>";
+          out +=
+            '<rect x="' +
+            (x + w + 3) +
+            '" y="' +
+            (H - 20 - ht) +
+            '" width="' +
+            w +
+            '" height="' +
+            ht +
+            '" rx="3" fill="#4338ca"><title>' +
+            d +
+            " · ບາດ " +
+            fmt(byDay[d].thb) +
+            "</title></rect>";
+          if (days.length <= 15 || i % 3 === 0)
+            out +=
+              '<text x="' +
+              (x + bw / 2) +
+              '" y="' +
+              (H - 6) +
+              '" text-anchor="middle" font-size="10" fill="#5f7d73">' +
+              d.slice(5) +
+              "</text>";
+        });
+        out +=
+          '<line x1="' +
+          pad +
+          '" y1="' +
+          (H - 20) +
+          '" x2="' +
+          (W - pad) +
+          '" y2="' +
+          (H - 20) +
+          '" stroke="#d7e5df"/>';
+        svg.innerHTML = out;
+      }
+
+      /* ---------- ສັດສ່ວນ ---------- */
+      function bars(a, b, la, lb, ca, cb) {
+        const tot = a + b || 1;
+        const pa = Math.round((a / tot) * 100);
+        return (
+          '<div class="bar"><span style="width:' +
+          pa +
+          "%;background:" +
+          ca +
+          '"></span></div><div class="legend"><span style="color:' +
+          ca +
+          '">' +
+          la +
+          " <b>" +
+          fmt(a) +
+          "</b> (" +
+          pa +
+          '%)</span><span style="color:' +
+          cb +
+          '">' +
+          lb +
+          " <b>" +
+          fmt(b) +
+          "</b> (" +
+          (100 - pa) +
+          "%)</span></div>"
+        );
+      }
+      function renderRatios(data) {
+        const t = totals(data);
+        document.getElementById("ratioTB").innerHTML = bars(
+          t.top,
+          t.bot,
+          "ບົນ",
+          "ລຸ່ມ",
+          "#0f766e",
+          "#b45309",
+        );
+        document.getElementById("ratioCur").innerHTML = bars(
+          t.lak,
+          t.thb,
+          "ກີບ ₭",
+          "ບາດ ฿",
+          "#047857",
+          "#4338ca",
+        );
+      }
+
+      /* ---------- ເລກແທງໜັກ ---------- */
+      function renderHot(data) {
+        const map = {};
+        data.forEach((sh) =>
+          sh.rows.forEach((r) => {
+            numList(r.nums).forEach((n) => {
+              if (!map[n]) map[n] = { n, times: 0, top: 0, bot: 0 };
+              map[n].times++;
+              map[n].top += toNum(r.top);
+              map[n].bot += toNum(r.bottom);
+            });
+          }),
+        );
+        const list = Object.values(map)
+          .map((x) => Object.assign(x, { total: x.top + x.bot }))
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 20);
+        const tb = document.getElementById("hotRows");
+        document.getElementById("hotEmpty").style.display = list.length
+          ? "none"
+          : "block";
+        const max = list.length ? list[0].total : 1;
+        tb.innerHTML = list
+          .map(
+            (x) =>
+              '<tr><td class="n">' +
+              x.n +
+              (x.total >= max * 0.7
+                ? ' <span class="pill hot">ສ່ຽງ</span>'
+                : "") +
+              '</td><td class="r n">' +
+              x.times +
+              '</td><td class="r n" style="color:var(--top)">' +
+              fmt(x.top) +
+              '</td><td class="r n" style="color:var(--bottom)">' +
+              fmt(x.bot) +
+              '</td><td class="r n">' +
+              fmt(x.total) +
+              "</td></tr>",
+          )
+          .join("");
+      }
+
+      /* ---------- ລູກຄ້າ ---------- */
+      function renderCustomers(data) {
+        const map = {};
+        data.forEach((sh) => {
+          sh.rows.forEach((r) => {
+            const nm =
+              (sh.segMeta[r.seg] && sh.segMeta[r.seg].name) || "(ບໍ່ມີຊື່)";
+            if (!map[nm]) map[nm] = { nm, sets: {}, cnt: 0, lak: 0, thb: 0 };
+            map[nm].sets[sh.id + ":" + r.seg] = 1;
+            const c = countNums(r.nums) || 1;
+            map[nm].cnt += c;
+            const t = rowTotal(r);
+            if ((r.cur || "LAK") === "THB") map[nm].thb += t;
+            else map[nm].lak += t;
+          });
+        });
+        const list = Object.values(map)
+          .map((x) => Object.assign(x, { nsets: Object.keys(x.sets).length }))
+          .sort((a, b) => b.lak + b.thb - (a.lak + a.thb));
+        document.getElementById("custEmpty").style.display = list.length
+          ? "none"
+          : "block";
+        document.getElementById("custRows").innerHTML = list
+          .map(
+            (x) =>
+              "<tr><td><b>" +
+              esc(x.nm) +
+              '</b></td><td class="r n">' +
+              x.nsets +
+              '</td><td class="r n">' +
+              fmt(x.cnt) +
+              '</td><td class="r n" style="color:var(--em-700)">' +
+              fmt(x.lak) +
+              '</td><td class="r n" style="color:var(--thb)">' +
+              fmt(x.thb) +
+              "</td></tr>",
+          )
+          .join("");
+      }
+
+      /* ---------- ໃບໂພຍ ---------- */
+      function renderSheets(data) {
+        document.getElementById("sheetEmpty").style.display = data.length
+          ? "none"
+          : "block";
+        document.getElementById("sheetRows").innerHTML = data
+          .map((sh) => {
+            let lak = 0,
+              thb = 0;
+            const segs = {};
+            sh.rows.forEach((r) => {
+              segs[r.seg] = 1;
+              const t = rowTotal(r);
+              if ((r.cur || "LAK") === "THB") thb += t;
+              else lak += t;
+            });
+            return (
+              '<tr><td class="n">' +
+              sh.date +
+              "</td><td>" +
+              esc(sh.name) +
+              '</td><td class="r n">' +
+              Object.keys(segs).length +
+              '</td><td class="r n">' +
+              sh.rows.length +
+              '</td><td class="r n" style="color:var(--em-700)">' +
+              fmt(lak) +
+              '</td><td class="r n" style="color:var(--thb)">' +
+              fmt(thb) +
+              "</td></tr>"
+            );
+          })
+          .join("");
+      }
+
+      function exportCsv() {
+        const data = filtered();
+        const out = [
+          ["ວັນທີ", "ໃບ", "ຊຸດ", "ເລກ", "ຕົວ", "ບົນ", "ລຸ່ມ", "ຍອດ", "ສະກຸນ"],
+        ];
+        data.forEach((sh) =>
+          sh.rows.forEach((r) =>
+            out.push([
+              sh.date,
+              sh.name,
+              (sh.segMeta[r.seg] && sh.segMeta[r.seg].name) || "",
+              r.nums,
+              countNums(r.nums) || 1,
+              toNum(r.top),
+              toNum(r.bottom),
+              rowTotal(r),
+              (r.cur || "LAK") === "THB" ? "ບາດ" : "ກີບ",
+            ]),
+          ),
+        );
+        const esc2 = (v) => {
+          v = v == null ? "" : String(v);
+          return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+        };
+        const csv = "\uFEFF" + out.map((r) => r.map(esc2).join(",")).join("\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+        );
+        a.download = "poy-dashboard.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function init() {
+        loadRates();
+        loadSheets();
+        render();
+      }
+      if (sessionStorage.getItem("poy_owner_ok") === "1") {
+        document.getElementById("lock").classList.add("hide");
+        init();
+      } else {
+        setTimeout(() => document.getElementById("pass").focus(), 150);
+      }
+    </script>
+  </body>
+</html>

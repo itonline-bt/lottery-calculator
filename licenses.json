@@ -1,8 +1,12 @@
 {
-  "updated": "2026-07-20T06:14:21.645Z",
+  "updated": "2026-07-20T08:01:18.262Z",
   "licenses": {
-    "9f375fdfba1a808c890eeaca928e1b799e27c5944474ee26459b5a2f35df7fb2": {
+    "31205a3632c129dde2ba146111661ff5a08e1de3e18e8148ddc695f429b191e9": {
       "exp": "2026-08-20",
+      "label": "sone"
+    },
+    "9cb7fcaaa489a98d2d56ebfa28a5e1bbdd454e3f94d57e38e1c1614aa5958c27": {
+      "exp": "2027-12-31",
       "label": "phone"
     }
   }
