@@ -324,6 +324,70 @@
         background: var(--thb-bg);
         color: var(--thb);
       }
+      /* ---------- ບັດຕົວຢ່າງກ່ອນເພີ່ມ ---------- */
+      .pv-wrap {
+        margin-top: 12px;
+        display: grid;
+        gap: 9px;
+        grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+        max-height: 30vh;
+        overflow: auto;
+      }
+      .pv {
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--em-500);
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      .pv-h {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        justify-content: space-between;
+      }
+      .pv-name {
+        font-weight: 800;
+        font-size: 15px;
+        color: var(--em-800);
+      }
+      .pv-sum {
+        font-family: var(--num);
+        font-weight: 800;
+        font-size: 16px;
+      }
+      .pv-time {
+        font-family: var(--num);
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .pv-lines {
+        font-family: var(--num);
+        font-size: 12.5px;
+        color: var(--ink-2);
+        margin-top: 7px;
+        line-height: 1.65;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .pv-more {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .pv.warn {
+        border-left-color: #e0a33a;
+      }
+      .chk {
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .chk.ok {
+        color: var(--em-700);
+      }
+      .chk.bad {
+        color: #c2410c;
+      }
       .preview {
         font-family: var(--num);
         font-variant-numeric: tabular-nums;
@@ -1328,6 +1392,7 @@
                   ເພີ່ມເຂົ້າລາຍການ
                 </button>
               </div>
+              <div class="pv-wrap" id="pvWrap" style="display: none"></div>
             </div>
 
             <details class="rules">
@@ -2087,16 +2152,8 @@
         }
         flushPending();
 
-        // ພິມເອງແຖວດຽວ = ຂຶ້ນເທິງສຸດ / ວາງທັງກ້ອນ = ຮຽງຕາມໂພຍ ຕໍ່ທ້າຍ
-        if (single && rows.length > startLen) {
-          const fresh = rows.splice(startLen);
-          rows = fresh.concat(rows);
-          firstNewIndex = 0;
-        } else if (rows.length > startLen) {
-          firstNewIndex = startLen;
-        } else {
-          firstNewIndex = -1;
-        }
+        // ທຸກກໍລະນີ ຕໍ່ທ້າຍ → ຮຽງ 1, 2, 3 ລົງລຸ່ມ ຕາມລຳດັບທີ່ໃສ່
+        firstNewIndex = rows.length > startLen ? startLen : -1;
         return added;
       }
 
@@ -2115,11 +2172,113 @@
         updatePreview();
         entry.focus();
       }
+      /* ອ່ານລອງ ໂດຍບໍ່ແຕະຂໍ້ມູນຈິງ */
+      function dryRun(text) {
+        const bRows = rows,
+          bMeta = segMeta,
+          bNotes = notes,
+          bSeg = segCounter,
+          bPrev = prevBet,
+          bFirst = firstNewIndex,
+          bCur = curCur;
+        rows = [];
+        segMeta = {};
+        notes = [];
+        segCounter = 0;
+        prevBet = null;
+        try {
+          processText(text);
+        } catch (e) {}
+        const out = { rows: rows, meta: segMeta };
+        rows = bRows;
+        segMeta = bMeta;
+        notes = bNotes;
+        segCounter = bSeg;
+        prevBet = bPrev;
+        firstNewIndex = bFirst;
+        curCur = bCur;
+        return out;
+      }
+      function renderPvCards(text) {
+        const wrap = document.getElementById("pvWrap");
+        const res = dryRun(text);
+        const segs = [];
+        res.rows.forEach((r) => {
+          if (segs.indexOf(r.seg) < 0) segs.push(r.seg);
+        });
+        if (!segs.length) {
+          wrap.style.display = "none";
+          wrap.innerHTML = "";
+          return 0;
+        }
+        wrap.style.display = "";
+        wrap.innerHTML = segs
+          .map(function (sg, i) {
+            const m = res.meta[sg] || {};
+            const gr = res.rows.filter((r) => r.seg === sg);
+            let sum = 0;
+            gr.forEach((r) => (sum += rowTotal(r)));
+            const sym = curSym((gr[0] && gr[0].cur) || m.cur || curCur);
+            const stated = toNum(m.stated);
+            const good = stated ? sameAmount(sum, stated) : true;
+            const okBad = stated
+              ? good
+                ? ' · <span class="chk ok">✓ ກົງ</span>'
+                : ' · <span class="chk bad">✗ ໂພຍຂຽນ ' + fmt(stated) + "</span>"
+              : "";
+            const show = gr.slice(0, 6);
+            let lines = show
+              .map(
+                (r) =>
+                  escapeHtml(r.nums) +
+                  " → " +
+                  (countNums(r.nums) || 1) +
+                  "ຕົວ × " +
+                  r.top +
+                  (r.bottom ? "+" + r.bottom : "") +
+                  " = " +
+                  fmt(rowTotal(r)),
+              )
+              .join("\n");
+            if (gr.length > show.length)
+              lines +=
+                '\n<span class="pv-more">… ອີກ ' +
+                (gr.length - show.length) +
+                " ແຖວ</span>";
+            const meta = [];
+            if (m.time) meta.push(escapeHtml(m.time));
+            if (m.sender) meta.push(escapeHtml(m.sender));
+            return (
+              '<div class="pv' +
+              (good ? "" : " warn") +
+              '"><div class="pv-h"><span class="pv-name">' +
+              escapeHtml(m.name || "ຊຸດ " + (i + 1)) +
+              '</span><span class="pv-sum">' +
+              fmt(sum) +
+              " " +
+              sym +
+              '</span></div><div class="pv-time">' +
+              (meta.length ? meta.join(" · ") : "ບໍ່ມີເວລາໃນຂໍ້ຄວາມ") +
+              " · " +
+              gr.length +
+              " ແຖວ" +
+              okBad +
+              '</div><div class="pv-lines">' +
+              lines +
+              "</div></div>"
+            );
+          })
+          .join("");
+        return segs.length;
+      }
       function updatePreview() {
         const el = document.getElementById("preview");
+        const wrap = document.getElementById("pvWrap");
         const txt = entry.value.trim();
         if (!txt) {
           el.innerHTML = "—";
+          wrap.style.display = "none";
+          wrap.innerHTML = "";
           return;
         }
         const lines = txt
@@ -2131,9 +2290,16 @@
           lines.forEach((l) => {
             if (isBetLine(l)) n++;
           });
-          el.innerHTML = lines.length + " ແຖວ · ເປັນລາຍການ " + n;
+          const nsets = renderPvCards(entry.value);
+          el.innerHTML =
+            lines.length +
+            " ແຖວ · ລາຍການ " +
+            n +
+            (nsets ? " · " + nsets + " ຊຸດ" : "");
           return;
         }
+        wrap.style.display = "none";
+        wrap.innerHTML = "";
         const b = parseBet(lines[0]);
         if (!b) {
           if (/^\d+(\.\d+)?$/.test(lines[0]))
@@ -2519,34 +2685,6 @@
           ]);
         });
         aoa.push([]);
-        aoa.push(["ສະຫຼຸບຕາມຊຸດ"]);
-        aoa.push([
-          "ຊຸດ",
-          "ເວລາ",
-          "ຜູ້ສົ່ງ",
-          "ຈຳນວນລາຍການ",
-          "ຍອດລວມ",
-          "ສະກຸນ",
-          "ຍອດທີ່ຂຽນ",
-          "ສະຖານະ",
-        ]);
-        segs.forEach((sg, i) => {
-          const m = segMeta[sg] || {};
-          const gr = rows.filter((r) => r.seg === sg);
-          const sum = segTotal(sg);
-          const stated = toNum(m.stated);
-          aoa.push([
-            segTitle(sg, i),
-            m.time || "",
-            m.sender || "",
-            gr.length,
-            sum,
-            curName((gr[0] && gr[0].cur) || m.cur || "LAK"),
-            stated || "",
-            stated ? (sameAmount(sum, stated) ? "ກົງກັນ" : "ບໍ່ກົງ") : "",
-          ]);
-        });
-        aoa.push([]);
         let lak = 0,
           thb = 0;
         rows.forEach((r) => {
@@ -2878,7 +3016,7 @@
         showInstallBtn(false);
       }
       /* ---------- ອັບເດດອັດຕະໂນມັດ + ບັງຄັບອັບເດດ ---------- */
-      const APP_VERSION = "2026.07.21-15";
+      const APP_VERSION = "2026.07.21-16";
       let swReg = null;
       let updShown = false;
 
